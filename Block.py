@@ -1,17 +1,17 @@
 class Block:
-    _addr = 0
-    _tag = -1
+    _leaf = 0
+    _segID = -1
     _data = -1
-    def __init__(self, addr, tag, data):
-        _addr = addr
-        _tag = tag
-        _data = data
-    def getAddr(self):
-        return _addr
-    def setAddr(self, addr):
-        _addr = addr
+    def __init__(self, leaf, segID, data):
+        self._leaf = leaf
+        self._segID = segID
+        self._data = data
+    def getLeaf(self):
+        return _leaf
+    def setLeaf(self, leaf):
+        _leaf = leaf
     def getTag(self):
-        return _tag
+        return _segID
     def getData(self):
         return _data
     def setData(self, data):
