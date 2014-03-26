@@ -13,11 +13,11 @@ def getMaxLevel(leaf1, leaf2):
 
     # now leaf1 and leaf2 are on the same level
     
-    z = leaf1 ^ leaf2	      # bitwise difference
+    b = leaf1 ^ leaf2	      # bitwise difference
     diff = 0
 
-    while z > 0:
-        z = int(z / 2)
+    while b > 0:
+        b = int(b / 2)
         diff+=1
         
     maxLevel = levelNumber(leaf1) - diff
