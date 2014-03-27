@@ -1,8 +1,9 @@
 # nodes are stored in a list
 # their position in the list is their address - 1
 # paths on the tree go from leaf to root
-# read and write use 2d lists of blocks
+# readPath and writePath use 2d lists of blocks
 
+import random
 import Util
 import Block
 
@@ -13,12 +14,14 @@ class Tree:
             self._nodes[i] = _TreeNode(z)
     def getSize(self):
         return len(self._nodes)
-    def read(self, leaf):
+    def randomLeaf(self):
+        return random.randint(int(len(self._nodes) / 2) + 1, len(self._nodes))
+    def readPath(self, leaf):
         result = []
         for addr in Util.getPathNodes(leaf):
             result.append(self._nodes[addr - 1].read())
         return result
-    def write(self, leaf, blocks):
+    def writePath(self, leaf, blocks):
         for addr in Util.getPathNodes(leaf):
             self._nodes[addr-1].write(blocks[0])
             blocks.pop(0)
