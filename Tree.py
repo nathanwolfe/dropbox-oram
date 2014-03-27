@@ -3,37 +3,32 @@
 # paths on the tree go from leaf to root
 # read and write use 2d lists of blocks
 
+import Util
+import Block
+
 class Tree:
-    _nodes = []
     def __init__(self, nodeNumber, z):
-        _nodes = [0] * nodeNumber
+        self._nodes = [0] * nodeNumber
         for i in range(nodeNumber):
-            _nodes[i] = _TreeNode(z)
+            self._nodes[i] = _TreeNode(z)
     def getSize(self):
-        return len(_nodes)
-    def pathAddrs(self, leaf):
-        result = []
-        while (leaf > 0):
-            result.append(leaf)
-            leaf = int(leaf / 2)
-        return result
+        return len(self._nodes)
     def read(self, leaf):
         result = []
-        for addr in pathAddrs(leaf):
-            result.append(_nodes[addr - 1].read())
+        for addr in Util.getPathNodes(leaf):
+            result.append(self._nodes[addr - 1].read())
         return result
     def write(self, leaf, blocks):
-        for addr in pathAddrs(leaf):
-            _nodes[addr-1].write(blocks[0])
+        for addr in Util.getPathNodes(leaf):
+            self._nodes[addr-1].write(blocks[0])
             blocks.pop(0)
 
 class _TreeNode:
-    _blocks = []
     def __init__(self, z):
-        _blocks = [0] * z
+        self._blocks = [0] * z
         for i in range(z):
-            _blocks[i] = Block(0, -1, -1)
+            self._blocks[i] = Block.Block(0, -1, -1)
     def read(self):
-        return _blocks
+        return self._blocks
     def write(self, blocks):
-        _blocks = blocks
+        self._blocks = blocks
