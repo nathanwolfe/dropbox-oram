@@ -15,7 +15,7 @@ class Stash:
     def deleteNode(self, index):
         del self._nodes[index]
 
-    def request(self, segID, oper, writeData):
+    def request(self, segID):
         
         for i in range(len(self._nodes)):
             if self._nodes[i].getSegID() == segID:
