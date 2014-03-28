@@ -17,18 +17,11 @@ class Stash:
 
     def request(self, segID, oper, writeData):
         
-        for i in range(len(self._nodes):
+        for i in range(len(self._nodes)):
             if self._nodes[i].getSegID() == segID:
-                if oper == "write":
-                    #set leaf to random number, based on tree size
-                    self._nodes[i].setData(writeData)
-                    return 0
-                elif oper == "read":
-                    #set leaf to random number, based on number of leaves on the tree
-                    return self._nodes[i].getData()
+                self._nodes.pop([i])                # request just returns the node if found
                        
-        # if the code reaches here (i.e. did not find the specific block) then 
-        # evict based on leaf of segID (uses PosMap), how to access the PosMap? and then remap as well
+        return "not found"
 
     def evict(self, leaf):            # returns list of the blocks that go in each node on the path as a 2d list, should compare IDs and return if found as well
         z, numLevels           # in which file would I find these?
