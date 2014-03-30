@@ -1,6 +1,6 @@
 # nodes are stored in a list
 # their position in the list is their address - 1
-# paths on the tree go from leaf to root
+# paths on the tree go from root to leaf
 # readPath and writePath use 2d lists of blocks
 
 import random
