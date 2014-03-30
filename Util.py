@@ -27,6 +27,6 @@ def getMaxLevel(leaf1, leaf2):
 def getPathNodes(leaf):           # returns a list of node numbers that are on the given path
     result = []
     while (leaf > 0):
-        result.append(leaf)
+        result.insert(0, leaf)
         leaf = int(leaf / 2)
     return result
