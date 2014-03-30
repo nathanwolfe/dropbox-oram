@@ -20,7 +20,6 @@ class Stash:
         
         for i in range(len(self._nodes)):
             if self._nodes[i].getSegID() == segID:
-                print(self._nodes)
                 return self._nodes.pop(i)                # request just returns the node if found
                        
         return "not found"
