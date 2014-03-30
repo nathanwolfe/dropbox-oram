@@ -19,16 +19,18 @@ class Stash:
         
         for i in range(len(self._nodes)):
             if self._nodes[i].getSegID() == segID:
-                return (self._nodes.pop([i]))                # request just returns the node if found
+                print(self._nodes)
+                return self._nodes.pop(i)                # request just returns the node if found
                        
         return "not found"
 
     def evict(self, leaf):            # returns list of the blocks that go in each node on the path as a 2d list, should compare IDs and return if found as well
-        z, numLevels           # in which file would I find these?
+        zee = 4
+        numLevels = 3           # in which file would I find these?
         result = [0] * numLevels
         
         for i in range(numLevels):
-            result[i] = [-1] * z
+            result[i] = [-1] * zee
         
         for i in range(len(_nodes)):                                  # put nodes in the list where 0th element is 0th level, etc.
             curLevel = Util.getMaxLevel(leaf, self._nodes[i].getLeaf)
@@ -36,10 +38,10 @@ class Stash:
             nodeEvicted = False
 
             while curLevel > -1:
-                for treeNodeIter in range(z):
+                for treeNodeIter in range(zee):
                     if result[curLevel][treeNodeIter] == -1:
-                        result[curLevel][treeNodeIter] = self._nodes[i].getSegID       # puts the segID of the block in the first available space in the list
-                        # self.deleteNode(i)     the top module should delete the things in the stash once put into the tree
+                        result[curLevel][treeNodeIter] = self._nodes[i]       # puts the segID of the block in the first available space in the list
+                        self.deleteNode(i)
                         nodeEvicted = True
                         break
 
