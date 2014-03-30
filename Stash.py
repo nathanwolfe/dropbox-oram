@@ -3,8 +3,9 @@ import Block
 
 class Stash:
 
-    def __init__(self):
+    def __init__(self, z):
         self._nodes = []
+        self._z = z
         
     def getSize(self):
         return len(self._nodes)
@@ -25,12 +26,11 @@ class Stash:
         return "not found"
 
     def evict(self, leaf):            # returns list of the blocks that go in each node on the path as a 2d list, should compare IDs and return if found as well
-        zee = 4
-        numLevels = 3           # in which file would I find these?
+        numLevels = Util.levelNumber(leaf) + 1           # in which file would I find these?
         result = [0] * numLevels
         
         for i in range(numLevels):
-            result[i] = [-1] * zee
+            result[i] = [Block.Block(0, -1, -1)] * self._z
         
         for i in range(len(self._nodes)):                                  # put nodes in the list where 0th element is 0th level, etc.
             curLevel = Util.getMaxLevel(leaf, self._nodes[i].getLeaf())
@@ -38,7 +38,7 @@ class Stash:
             nodeEvicted = False
 
             while curLevel > -1:
-                for treeNodeIter in range(zee):
+                for treeNodeIter in range(self._z):
                     if result[curLevel][treeNodeIter] == -1:
                         result[curLevel][treeNodeIter] = self._nodes[i]       # puts the segID of the block in the first available space in the list
                         self.deleteNode(i)

@@ -8,7 +8,7 @@ class Oram:
     def __init__(self, treeSize, z):
         self._z = z
         self._tree = Tree.Tree(treeSize, z)
-        self._stash = Stash.Stash()
+        self._stash = Stash.Stash(z)
         self._posMap = PosMap.PosMap()
         
     def read(self, segID):
