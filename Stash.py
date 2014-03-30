@@ -43,7 +43,7 @@ class Stash:
                         nodeEvicted = True
                         break
 
-                if nodeEvicted = False:                       # if a node was not evicted, then we move to the next node
+                if nodeEvicted == False:                       # if a node was not evicted, then we move to the next node
                     curLevel-=1
                 else:
                     break
