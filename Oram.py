@@ -49,7 +49,7 @@ class Oram:
                             block.setLeaf(self._tree.randomLeaf())
                             self._posMap.insert(segID, block.getLeaf())
                         self._stash.addNode(block)
-            if !blockFound:
+            if blockFound == False:
                 newBlock = Block.Block(self._tree.randomLeaf(), segID, data)
                 self._stash.addNode(newBlock)
                 self._posMap.insert(segID, newBlock.getLeaf())
