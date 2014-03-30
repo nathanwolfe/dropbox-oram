@@ -15,7 +15,7 @@ class Oram:
         reqResult = self._stash.request(segID)
         if reqResult != "not found":
             self._stash.addNode(reqResult)
-            return reqResult
+            return reqResult.getData()
         else:
             leaf = self._posMap.lookup(segID)
             transfer = self._tree.readPath(leaf)

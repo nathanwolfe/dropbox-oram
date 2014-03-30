@@ -32,8 +32,8 @@ class Stash:
         for i in range(numLevels):
             result[i] = [-1] * zee
         
-        for i in range(len(_nodes)):                                  # put nodes in the list where 0th element is 0th level, etc.
-            curLevel = Util.getMaxLevel(leaf, self._nodes[i].getLeaf)
+        for i in range(len(self._nodes)):                                  # put nodes in the list where 0th element is 0th level, etc.
+            curLevel = Util.getMaxLevel(leaf, self._nodes[i].getLeaf())
             treeNodeIter = 0
             nodeEvicted = False
 
