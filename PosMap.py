@@ -10,3 +10,6 @@ class PosMap :
 
 	def insert(self, key, value) :
 		self._pos_map[key] = value
+
+	def delete(self, key):
+		del self._pos_map[key]

@@ -62,6 +62,9 @@ class Oram:
             transfer = tree.readPath(leaf)
             for bucket in transfer:
                 for block in bucket:
-                    if block.getSegID != -1 and block.getSegID != segID:
-                        self._stash.addNode(block)
+                    if block.getSegID != -1:
+                        if block.getSegID == segID:
+                            self._posMap.delete(segID)
+                        else:
+                            self._stash.addNode(block)
             self._tree.writePath(leaf, self._stash.evict(leaf))
