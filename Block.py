@@ -1,7 +1,5 @@
 class Block:
-    #self._leaf = 0
-    #self._segID = "-1"         # I believe you cannot set default values for these
-    #self._data = -1
+    
     def __init__(self, leaf, segID, data):
         self._leaf = leaf
         self._segID = segID
