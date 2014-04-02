@@ -32,30 +32,37 @@ def TestRepeatRW() :
     
 
 def TestGeneral() :
-    oramsize=1024*1024 - 1
+    oramsize=5000
     oram = Oram.Oram(oramsize, 4)
     check  = {}
-
-    numTests = 1000
-    for key in range(0, numTests) :                 # writes a "random" string to each key from 0 to numTests-1
+    N = 1000
+    numTests = 10000
+    
+    for key in range(0, N) :                 # writes a "random" string to each key from 0 to N
         data = "v" + str(random.randint(1,1000))
         oram.write(key, data)
         check[key] = data
         
-    for key in range(0, numTests):        # deletes a randomn subset of them  
-        delete  = random.random()
-        if (delete<0.4):
-            oram.delete(key)
-            check[key] = -1
+    for i in range(0, numTests):        # does a random operation
+        operation = random.random()
+        key = random.randint(0, N-1)
+        if (operation < 0.2):
+            data = "x" + str(random.randint(1,1000))
+            oram.write(key, data)
+            check[key] = data
 
-    for key in range(0,numTests):        # actual test
-        try:
-            getValue = oram.read(key)
-            assert (getValue == check[key])
-            
-        except:
-            print( "[TestGeneral] key=%d. expecting %s but got %s" % (key, check[key], getvalue) )
-            return
+        elif (operation <0.6):
+            try:
+                getValue = oram.read(key)
+                assert (getValue == check[key])
+            except:
+                print( "[TestGeneral] key=%d. expecting %s but got %s" % (key, check[key], getvalue) )
+                return
+
+        else:
+            if (check[key] != -1):
+                oram.delete(key)
+                check[key] = -1
         
     print ("TestGeneral Passed")
 
