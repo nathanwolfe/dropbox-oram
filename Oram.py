@@ -14,7 +14,7 @@ class Oram:
     def read(self, segID):
         reqResult = self._stash.request(segID)
         if reqResult != "not found":
-            print("request succeeded")
+            #print("request succeeded")
             self._stash.addNode(reqResult)
             return reqResult.getData()
         else:
@@ -25,25 +25,25 @@ class Oram:
                 for block in bucket:
                     if block.getSegID() != -1:
                         if block.getSegID() == segID:
-                            print ("found block")
+                            #print ("found block")
                             readResult = block.getData()
                             block.setLeaf(self._tree.randomLeaf())
                             self._posMap.insert(segID, block.getLeaf())
                         self._stash.addNode(block)
-                        print(block.getSegID())
+                        #print(block.getSegID())
             self._tree.writePath(leaf, self._stash.evict(leaf))
             return readResult
         
     def write(self, segID, data):
         reqResult = self._stash.request(segID)
         if reqResult != "not found":
-            print("request succeeded")
+            #print("request succeeded")
             reqResult.setData(data)
             self._stash.addNode(reqResult)
         else:
             leaf = self._posMap.lookup(segID)
             if leaf == -1:
-                print("not found in posmap")
+                #print("not found in posmap")
                 leaf = self._tree.randomLeaf()
             transfer = self._tree.readPath(leaf)
             blockFound = False
@@ -56,12 +56,12 @@ class Oram:
                             block.setLeaf(self._tree.randomLeaf())
                             self._posMap.insert(segID, block.getLeaf())
                         self._stash.addNode(block)
-                        print(block.getSegID())
+                        #print(block.getSegID())
             if blockFound == False:
                 newBlock = Block.Block(self._tree.randomLeaf(), segID, data)
                 self._stash.addNode(newBlock)
                 self._posMap.insert(segID, newBlock.getLeaf())
-                print("new block inserted")
+                #print("new block inserted")
             self._tree.writePath(leaf, self._stash.evict(leaf))
             
     def delete(self, segID):
@@ -79,4 +79,5 @@ class Oram:
                             print(block.getSegID())
             self._tree.writePath(leaf, self._stash.evict(leaf))
         else:
-            print("request succeeded")
+            return
+            #print("request succeeded")

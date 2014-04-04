@@ -48,12 +48,12 @@ def TestGeneral() :
     for i in range(0, numTests):        # does a random operation
         operation = random.random()
         key = random.randint(0, N-1)
-        if (operation < .5):
+        if (operation < .2):
             data = "x" + str(random.randint(1,1000))
             oram.write(key, data)
             check[key] = data
 
-        elif (operation <1):
+        elif (operation <.6):
             try:
                 getValue = oram.read(key)
                 assert (getValue == check[key])
