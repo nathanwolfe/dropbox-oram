@@ -13,6 +13,8 @@ def TestBasic() :
         except :
             print( "[TestBasic] key=%d. expecting %s but got %s" % (key, str(key), getvalue) )
             print( "TestBasic failed." )
+
+        print(oram._stash.getSize())
     print( "TestBasic Passed." )
 
 def TestRepeatRW() :
@@ -32,11 +34,11 @@ def TestRepeatRW() :
     
 
 def TestGeneral() :
-    oramsize=5000
+    oramsize=25
     oram = Oram.Oram(oramsize, 4)
     check  = {}
     N = 1000
-    numTests = 10000
+    numTests = 100
     
     for key in range(0, N) :                 # writes a "random" string to each key from 0 to N
         data = "v" + str(random.randint(1,1000))
@@ -46,23 +48,24 @@ def TestGeneral() :
     for i in range(0, numTests):        # does a random operation
         operation = random.random()
         key = random.randint(0, N-1)
-        if (operation < 0.2):
+        if (operation < .5):
             data = "x" + str(random.randint(1,1000))
             oram.write(key, data)
             check[key] = data
 
-        elif (operation <0.6):
+        elif (operation <1):
             try:
                 getValue = oram.read(key)
                 assert (getValue == check[key])
             except:
-                print( "[TestGeneral] key=%d. expecting %s but got %s" % (key, check[key], getvalue) )
+                print( "[TestGeneral] key=%d. expecting %s but got %s" % (key, check[key], getValue) )
                 return
 
         else:
             if (check[key] != -1):
                 oram.delete(key)
                 check[key] = -1
+        print (oram._stash.getSize())
         
     print ("TestGeneral Passed")
 

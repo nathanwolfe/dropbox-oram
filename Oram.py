@@ -14,16 +14,20 @@ class Oram:
     def read(self, segID):
         reqResult = self._stash.request(segID)
         if reqResult != "not found":
+            print ("test")
             self._stash.addNode(reqResult)
+            self._tree.writePath(self._posMap.lookup(segID), self._stash.evict(self._posMap.lookup(segID)))
             return reqResult.getData()
         else:
+            print ("otherTest")
             leaf = self._posMap.lookup(segID)
             transfer = self._tree.readPath(leaf)
             readResult = -1                          # -1 means not found
             for bucket in transfer:
                 for block in bucket:
-                    if block.getSegID != -1:
-                        if block.getSegID == segID:
+                    if block.getSegID() != -1:
+                        if block.getSegID() == segID:
+                            print ("found block")
                             readResult = block.getData()
                             block.setLeaf(self._tree.randomLeaf())
                             self._posMap.insert(segID, block.getLeaf())
@@ -36,14 +40,16 @@ class Oram:
         if reqResult != "not found":
             reqResult.setData(data)
             self._stash.addNode(reqResult)
+            print ("test")
+            self._tree.writePath(self._posMap.lookup(segID), self._stash.evict(self._posMap.lookup(segID)))
         else:
             leaf = self._posMap.lookup(segID)
             transfer = self._tree.readPath(leaf)
             blockFound = False
             for bucket in transfer:
                 for block in bucket:
-                    if block.getSegID != -1:
-                        if block.getSegID == segID:
+                    if block.getSegID() != -1:
+                        if block.getSegID() == segID:
                             blockFound = True
                             block.setData(data)
                             block.setLeaf(self._tree.randomLeaf())
@@ -57,6 +63,9 @@ class Oram:
             
     def delete(self, segID):
         reqResult = self._stash.request(segID)
+        if reqResult != "not found":
+            print ("test")
+            self._tree.writePath(self._posMap.lookup(segID), self._stash.evict(self._posMap.lookup(segID)))
         if reqResult == "not found":
             leaf = self._posMap.lookup(segID)
             transfer = tree.readPath(leaf)
