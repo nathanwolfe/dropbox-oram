@@ -20,7 +20,7 @@ class Oram:
         else:
             leaf = self._posMap.lookup(segID)
             transfer = self._tree.readPath(leaf)
-            readResult = -2                          # -2 means not found
+            readResult = -1                          # -1 means not found
             for bucket in transfer:
                 for block in bucket:
                     if block.getSegID() != -1:
