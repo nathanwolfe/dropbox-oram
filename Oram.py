@@ -25,6 +25,7 @@ class Oram:
                 for block in bucket:
                     if block.getSegID() != -1:
                         if block.getSegID() == segID:
+                            print ("found block")
                             readResult = block.getData()
                             block.setLeaf(self._tree.randomLeaf())
                             self._posMap.insert(segID, block.getLeaf())
