@@ -42,6 +42,9 @@ class Oram:
             self._stash.addNode(reqResult)
         else:
             leaf = self._posMap.lookup(segID)
+            if leaf == -1:
+                print("not found in posmap")
+                leaf = self._tree.randomLeaf()
             transfer = self._tree.readPath(leaf)
             blockFound = False
             for bucket in transfer:

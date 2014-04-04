@@ -45,6 +45,7 @@ class Stash:
                     if result[curLevel][treeNodeIter].getSegID() == -1:
                         #print ("entering")
                         result[curLevel][treeNodeIter] = self._nodes[i]       # puts the segID of the block in the first available space in the list
+                        print(self._nodes[i].getSegID())
                         self.deleteNode(i)
                         nodeEvicted = True
                         break
