@@ -22,9 +22,8 @@ class Tree:
             result.append(self._nodes[addr - 1].read())
         return result
     def writePath(self, leaf, blocks):
-        def writePath(self, leaf, blocks):
-            for addr in Util.getPathNodes(leaf):
-                self._nodes[addr-1].write(blocks.pop(0))
+        for addr in Util.getPathNodes(leaf):
+            self._nodes[addr-1].write(blocks.pop(0))
 
 class _TreeNode:
     def __init__(self, z):
