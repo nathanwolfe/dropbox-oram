@@ -68,7 +68,7 @@ class Oram:
         reqResult = self._stash.request(segID)
         if reqResult == "not found":
             leaf = self._posMap.lookup(segID)
-            transfer = tree.readPath(leaf)
+            transfer = self._tree.readPath(leaf)
             for bucket in transfer:
                 for block in bucket:
                     if block.getSegID() != -1:
