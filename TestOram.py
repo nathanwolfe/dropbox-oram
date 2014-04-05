@@ -3,12 +3,12 @@ import random
 
 def TestBasic() :
     oramsize = 1 << 4 - 1
-    oram = Oram.Oram(oramsize, 4)
+    oram = Oram.Oram(oramsize, 4, 100)
     for key in range(0, oramsize) :
         oram.write(key, str(key))
     for key in range(0, oramsize) :
         try :
-            getvalue = oram.read(key)
+            getvalue = oram.read(key).decode("utf-8")
             assert (getvalue == str(key))
         except :
             print( "[TestBasic] key=%d. expecting %s but got %s" % (key, str(key), getvalue) )
@@ -19,13 +19,13 @@ def TestBasic() :
 
 def TestRepeatRW() :
     oramsize = 1 << 4 - 1
-    oram = Oram.Oram(oramsize, 4)
+    oram = Oram.Oram(oramsize, 4, 100)
     db = {}
     for key in range(0, oramsize) :
         oram.write(key, str(key))
     for key in range(0, oramsize) :
         try :
-            getvalue = oram.read(key)
+            getvalue = oram.read(key).decode("utf-8")
             assert (getvalue == str(key))
             oram.write(key, 'v')
         except :
@@ -35,7 +35,7 @@ def TestRepeatRW() :
 
 def TestGeneral() :
     oramsize=25
-    oram = Oram.Oram(oramsize, 4)
+    oram = Oram.Oram(oramsize, 4, 100)
     check  = {}
     N = 1000
     numTests = 100
@@ -55,7 +55,7 @@ def TestGeneral() :
 
         elif (operation <.6):
             try:
-                getValue = oram.read(key)
+                getValue = oram.read(key).decode("utf-8")
                 assert (getValue == check[key])
             except:
                 print( "[TestGeneral] key=%d. expecting %s but got %s" % (key, check[key], getValue) )

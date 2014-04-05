@@ -29,7 +29,7 @@ class Stash:
         result = [0] * numLevels
         
         for i in range(numLevels):
-            result[i] = [Block.Block(0, -1, -1)] * self._z
+            result[i] = [Block.Block(0, 0, b"")] * self._z
         
         for node in self._nodes:                                  # put nodes in the list where 0th element is 0th level, etc.
             curLevel = Util.getMaxLevel(leaf, node.getLeaf())
@@ -42,7 +42,7 @@ class Stash:
                 for treeNodeIter in range(self._z):
                     #print (treeNodeIter)
                     #print (curLevel)
-                    if result[curLevel][treeNodeIter].getSegID() == -1:
+                    if result[curLevel][treeNodeIter].getSegID() == 0:
                         #print ("entering")
                         result[curLevel][treeNodeIter] = node       # puts the segID of the block in the first available space in the list
                         #print(node.getSegID())

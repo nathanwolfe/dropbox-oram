@@ -6,31 +6,27 @@
 import random
 import Util
 import Block
+import DBFileSys
 
 class Tree:
-    def __init__(self, nodeNumber, z):
-        self._nodes = [0] * nodeNumber
-        for i in range(nodeNumber):
-            self._nodes[i] = _TreeNode(z)
+    def __init__(self, nodeNumber, z, segmentSize):
+        self._size = nodeNumber
+        self._segmentSize = segmentSize
+        for i in range(1, nodeNumber + 1):
+            self.writeBucket(i, [Block.Block(0, 0, b"")] * z)
     def getSize(self):
-        return len(self._nodes)
+        return self._size
     def randomLeaf(self):
-        return random.randint(int(len(self._nodes) / 2) + 1, len(self._nodes))
+        return random.randint(int(self._size / 2) + 1, self._size)
+    def readBucket(self, bucketID):
+        return DBFileSys.readBucket(bucketID, self._segmentSize)
+    def writeBucket(self, bucketID, blocks):
+        DBFileSys.writeBucket(bucketID, blocks, self._segmentSize)
     def readPath(self, leaf):
         result = []
         for addr in Util.getPathNodes(leaf):
-            result.append(self._nodes[addr - 1].read())
+            result.append(self.readBucket(addr))
         return result
     def writePath(self, leaf, blocks):
         for addr in Util.getPathNodes(leaf):
-            self._nodes[addr-1].write(blocks.pop(0))
-
-class _TreeNode:
-    def __init__(self, z):
-        self._blocks = [0] * z
-        for i in range(z):
-            self._blocks[i] = Block.Block(0, -1, -1)
-    def read(self):
-        return self._blocks
-    def write(self, blocks):
-        self._blocks = blocks
+            self.writeBucket(addr, blocks.pop(0))

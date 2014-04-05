@@ -5,9 +5,9 @@ import Stash
 import PosMap
 
 class Oram:
-    def __init__(self, treeSize, z):
+    def __init__(self, treeSize, z, segmentSize):
         self._z = z
-        self._tree = Tree.Tree(treeSize, z)
+        self._tree = Tree.Tree(treeSize, z, segmentSize)
         self._stash = Stash.Stash(z)
         self._posMap = PosMap.PosMap()
         
@@ -23,7 +23,7 @@ class Oram:
             readResult = -1                          # -1 means not found
             for bucket in transfer:
                 for block in bucket:
-                    if block.getSegID() != -1:
+                    if block.getSegID() != 0:
                         if block.getSegID() == segID:
                             #print ("found block")
                             readResult = block.getData()
@@ -35,6 +35,8 @@ class Oram:
             return readResult
         
     def write(self, segID, data):
+        if isinstance(data, str):
+            data = data.encode("utf-8")
         reqResult = self._stash.request(segID)
         if reqResult != "not found":
             #print("request succeeded")
@@ -49,7 +51,7 @@ class Oram:
             blockFound = False
             for bucket in transfer:
                 for block in bucket:
-                    if block.getSegID() != -1:
+                    if block.getSegID() != 0:
                         if block.getSegID() == segID:
                             blockFound = True
                             block.setData(data)
@@ -71,13 +73,12 @@ class Oram:
             transfer = self._tree.readPath(leaf)
             for bucket in transfer:
                 for block in bucket:
-                    if block.getSegID() != -1:
+                    if block.getSegID() != 0:
                         if block.getSegID() == segID:
                             self._posMap.delete(segID)
                         else:
                             self._stash.addNode(block)
-                            print(block.getSegID())
+                            #print(block.getSegID())
             self._tree.writePath(leaf, self._stash.evict(leaf))
-        else:
-            return
+        #else:
             #print("request succeeded")
