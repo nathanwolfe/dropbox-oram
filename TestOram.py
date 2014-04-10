@@ -34,16 +34,26 @@ def TestRepeatRW() :
     
 
 def TestGeneral() :
-    oramsize=25
+    oramsize = 25
     oram = Oram.Oram(oramsize, 4, 100)
     check  = {}
-    N = 1000
-    numTests = 100
+    N = 10
+    numTests = 10
     
+    lastStashSize = 0
+    currentStashSize = 0
+	
     for key in range(0, N) :                 # writes a "random" string to each key from 0 to N
         data = "v" + str(random.randint(1,1000))
         oram.write(key, data)
-        check[key] = data
+        check[key] = data	
+		
+        currentStashSize = oram._stash.getSize()
+        print ("ORAM Stash Size: ", currentStashSize)		
+        if 	currentStashSize - lastStashSize > 1:
+            print("Stash increases by more than 1")			
+            exit(0)
+        lastStashSize = currentStashSize			
         
     for i in range(0, numTests):        # does a random operation
         operation = random.random()
@@ -65,7 +75,13 @@ def TestGeneral() :
             if (check[key] != -1):
                 oram.delete(key)
                 check[key] = -1
-        print (oram._stash.getSize())
+        
+        currentStashSize = oram._stash.getSize()
+        print ("ORAM Stash Size: ", currentStashSize)		
+        if 	currentStashSize - lastStashSize > 1:
+            print("Stash increases by more than 1")			
+            exit(0)	
+        lastStashSize = currentStashSize
         
     print ("TestGeneral Passed")
 

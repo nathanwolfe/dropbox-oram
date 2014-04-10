@@ -9,11 +9,14 @@ class Oram:
         self._z = z
         self._tree = Tree.Tree(treeSize, z, segmentSize)
         self._stash = Stash.Stash(z)
-        self._posMap = PosMap.PosMap()
+        self._posMap = PosMap.PosMap()	
+        self.use_vcache = 0
+		
+        self.debug = 1			
         
     def read(self, segID):
         reqResult = self._stash.request(segID)
-        if reqResult != "not found":
+        if reqResult != "not found" and self.use_vcache:
             #print("request succeeded")
             self._stash.addNode(reqResult)
             return reqResult.getData()
@@ -38,7 +41,7 @@ class Oram:
         if isinstance(data, str):
             data = data.encode("utf-8")
         reqResult = self._stash.request(segID)
-        if reqResult != "not found":
+        if reqResult != "not found" and self.use_vcache:
             #print("request succeeded")
             reqResult.setData(data)
             self._stash.addNode(reqResult)
@@ -49,8 +52,13 @@ class Oram:
                 leaf = self._tree.randomLeaf()
             transfer = self._tree.readPath(leaf)
             blockFound = False
-            for bucket in transfer:
+			
+            if self.debug:
+                print("\tReading from path ", leaf)			
+            for bucket in transfer:          				
                 for block in bucket:
+                    if self.debug:
+                        print("\t\t", block.getLeaf(), block.getSegID(), block.getData())								
                     if block.getSegID() != 0:
                         if block.getSegID() == segID:
                             blockFound = True
@@ -59,12 +67,24 @@ class Oram:
                             self._posMap.insert(segID, block.getLeaf())
                         self._stash.addNode(block)
                         #print(block.getSegID())
+                if self.debug:
+                    print("")
+					
             if blockFound == False:
                 newBlock = Block.Block(self._tree.randomLeaf(), segID, data)
                 self._stash.addNode(newBlock)
                 self._posMap.insert(segID, newBlock.getLeaf())
                 #print("new block inserted")
-            self._tree.writePath(leaf, self._stash.evict(leaf))
+
+            outPath = self._stash.evict(leaf)
+            if self.debug:				
+                print("\tWriting to path ", leaf)		
+                for bucket in outPath:
+                    for block in bucket:
+                        print("\t\t", block.getLeaf(), block.getSegID(), block.getData())
+                    print("")
+				
+            self._tree.writePath(leaf, outPath)
             
     def delete(self, segID):
         reqResult = self._stash.request(segID)
