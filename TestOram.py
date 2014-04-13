@@ -43,7 +43,7 @@ def TestGeneral() :
     lastStashSize = 0
     currentStashSize = 0
 	
-    for key in range(0, N) :                 # writes a "random" string to each key from 0 to N
+    for key in range(1, N) :                 # writes a "random" string to each key from 0 to N
         data = "v" + str(random.randint(1,1000))
         oram.write(key, data)
         check[key] = data	
@@ -57,7 +57,7 @@ def TestGeneral() :
         
     for i in range(0, numTests):        # does a random operation
         operation = random.random()
-        key = random.randint(0, N-1)
+        key = random.randint(1, N-1)
         if (operation < .2):
             data = "x" + str(random.randint(1,1000))
             oram.write(key, data)
@@ -72,9 +72,9 @@ def TestGeneral() :
                 return
 
         else:
-            if (check[key] != -1):
+            if (check[key] != ""):
                 oram.delete(key)
-                check[key] = -1
+                check[key] = ""
         
         currentStashSize = oram._stash.getSize()
         print ("ORAM Stash Size: ", currentStashSize)		
