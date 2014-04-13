@@ -14,6 +14,11 @@ class Oram:
 		
         self.debug = False			
         
+		# TODO: wrap the common code (read/write paths and debug output)
+		# Comment: You may find it helpful to print out stash content when debugging
+		
+		# TODO: support self.use_vcache = False (not urgent)
+		
     def read(self, segID):
         reqResult = self._stash.request(segID)
         if reqResult != "not found" and self.use_vcache:
@@ -24,9 +29,9 @@ class Oram:
             leaf = self._posMap.lookup(segID)
             if leaf == -1:
                 #print("not found in posmap")
-                leaf = self._tree.randomLeaf()
+                leaf = self._tree.randomLeaf()		
             transfer = self._tree.readPath(leaf)
-            readResult = b""                          # -1 means not found
+            readResult = b""                  # -1 means not found	# TODO: reading or deleting a non-existent block is arguably illegal. You can simply raise an error using assert
             if self.debug:
                 print("\tReading from path ", leaf)
             for bucket in transfer:
