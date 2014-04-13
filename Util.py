@@ -9,9 +9,9 @@ def levelNumber(leaf):          # returns the level the leaf is on (used in getM
 
 def getMaxLevel(leaf1, leaf2):
     if levelNumber(leaf1) > levelNumber(leaf2):
-        leaf1 = int(leaf1/2)
+        leaf1/=2
     elif levelNumber(leaf1) < levelNumber(leaf2):
-        leaf2 = int(leaf2/2)
+        leaf2/=2
 
     # now leaf1 and leaf2 are on the same level
     

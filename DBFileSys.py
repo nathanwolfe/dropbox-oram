@@ -2,9 +2,9 @@ import os
 import Block
 
 def readBucket(bucketID, maxDataLength):
-    if not os.path.exists("blocks"):
-        os.makedirs("blocks")
-    inputFile = open("blocks/" + str(bucketID), "rb")         # rb = read binary
+    if not os.path.exists("buckets"):
+        os.makedirs("buckets")
+    inputFile = open("buckets/" + str(bucketID), "rb")         # rb = read binary
     result = []
     while True:
         leafBytes = inputFile.read(4)
@@ -18,9 +18,9 @@ def readBucket(bucketID, maxDataLength):
     return result
 
 def writeBucket(bucketID, blocks, maxDataLength):
-    if not os.path.exists("blocks"):
-        os.makedirs("blocks")
-    outputFile = open("blocks/" + str(bucketID), "wb")        # wb = write binary
+    if not os.path.exists("buckets"):
+        os.makedirs("buckets")
+    outputFile = open("buckets/" + str(bucketID), "wb")        # wb = write binary
     for block in blocks:
         outputFile.write(block.getLeaf().to_bytes(4, byteorder = "little"))
         outputFile.write(block.getSegID().to_bytes(4, byteorder = "little"))
