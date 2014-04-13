@@ -10,9 +10,9 @@ class Oram:
         self._tree = Tree.Tree(treeSize, z, segmentSize)
         self._stash = Stash.Stash(z)
         self._posMap = PosMap.PosMap()	
-        self.use_vcache = 0
+        self.use_vcache = True
 		
-        self.debug = 0			
+        self.debug = True			
         
     def read(self, segID):
         reqResult = self._stash.request(segID)

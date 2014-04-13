@@ -34,11 +34,11 @@ def TestRepeatRW() :
     
 
 def TestGeneral() :
-    oramsize = 100
+    oramsize = 15
     oram = Oram.Oram(oramsize, 4, 100)
     check  = {}
-    N = 100
-    numTests = 1000
+    N = 30
+    numTests = 10000
     
     lastStashSize = 0
     currentStashSize = 0
