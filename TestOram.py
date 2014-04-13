@@ -37,8 +37,8 @@ def TestGeneral() :
     oramsize = 25
     oram = Oram.Oram(oramsize, 4, 100)
     check  = {}
-    N = 10
-    numTests = 10
+    N = 100
+    numTests = 1000
     
     lastStashSize = 0
     currentStashSize = 0

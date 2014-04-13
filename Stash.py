@@ -30,29 +30,32 @@ class Stash:
         
         for i in range(numLevels):
             result[i] = [Block.Block(0, 0, b"")] * self._z
-        
-        for node in self._nodes:                                  # put nodes in the list where 0th element is 0th level, etc.
-            curLevel = Util.getMaxLevel(leaf, node.getLeaf())
+
+        stashIter = 0
+        while stashIter < len(self._nodes):                                  # put nodes in the list where 0th element is 0th level, etc.
+            curLevel = Util.getMaxLevel(leaf, self._nodes[stashIter].getLeaf())
             #treeNodeIter = 0
             nodeEvicted = False
 
             while curLevel > -1:
                 #print ("another test")
-                treeNodeIter=0
+                #treeNodeIter=0
                 for treeNodeIter in range(self._z):
                     #print (treeNodeIter)
                     #print (curLevel)
                     if result[curLevel][treeNodeIter].getSegID() == 0:
                         #print ("entering")
-                        result[curLevel][treeNodeIter] = node       # puts the segID of the block in the first available space in the list
+                        result[curLevel][treeNodeIter] = self._nodes[stashIter]       # puts the segID of the block in the first available space in the list
                         #print(node.getSegID())
-                        self._nodes.remove(node)
+                        self.deleteNode(stashIter)
                         nodeEvicted = True
                         break
 
                 if nodeEvicted == False:                       # if a node was not evicted, then we move to the next node
                     #print ("enter")
                     curLevel-=1
+                    if (curLevel == -1):
+                        stashIter+=1
                 else:
                     break
 
