@@ -3,11 +3,11 @@ def levelNumber(leaf):          # returns the level the leaf is on (used in getM
     while leaf > 1:
         level+=1
         leaf = int (leaf / 2)
+        #leaf = leaf >> 1
+		# Comment: you can use right-shift (>> 1) instead of division by 2, then you can remove all the other int()
     return level
 
 def getMaxLevel(leaf1, leaf2):
-	# Comment: if you first do leaf1 = int(leaf1), leaf2 = int(leaf2), you can remove all the other int()
-
     if levelNumber(leaf1) > levelNumber(leaf2):
         leaf1 = int(leaf1/2)
     elif levelNumber(leaf1) < levelNumber(leaf2):
