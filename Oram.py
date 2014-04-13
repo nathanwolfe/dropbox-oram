@@ -12,7 +12,7 @@ class Oram:
         self._posMap = PosMap.PosMap()	
         self.use_vcache = True
 		
-        self.debug = True			
+        self.debug = False			
         
     def read(self, segID):
         reqResult = self._stash.request(segID)
@@ -22,10 +22,17 @@ class Oram:
             return reqResult.getData()
         else:
             leaf = self._posMap.lookup(segID)
+            if leaf == -1:
+                #print("not found in posmap")
+                leaf = self._tree.randomLeaf()
             transfer = self._tree.readPath(leaf)
             readResult = b""                          # -1 means not found
+            if self.debug:
+                print("\tReading from path ", leaf)
             for bucket in transfer:
                 for block in bucket:
+                    if self.debug:
+                        print("\t\t", block.getLeaf(), block.getSegID(), block.getData())
                     if block.getSegID() != 0:
                         if block.getSegID() == segID:
                             #print ("found block")
@@ -34,7 +41,17 @@ class Oram:
                             self._posMap.insert(segID, block.getLeaf())
                         self._stash.addNode(block)
                         #print(block.getSegID())
-            self._tree.writePath(leaf, self._stash.evict(leaf))
+                if self.debug:
+                    print("")
+            outPath = self._stash.evict(leaf)
+            if self.debug:				
+                print("\tWriting to path ", leaf)		
+                for bucket in outPath:
+                    for block in bucket:
+                        print("\t\t", block.getLeaf(), block.getSegID(), block.getData())
+                    print("")
+				
+            self._tree.writePath(leaf, outPath)
             return readResult
         
     def write(self, segID, data):
@@ -90,15 +107,32 @@ class Oram:
         reqResult = self._stash.request(segID)
         if reqResult == "not found":
             leaf = self._posMap.lookup(segID)
+            if leaf == -1:
+                #print("not found in posmap")
+                leaf = self._tree.randomLeaf()
             transfer = self._tree.readPath(leaf)
+            if self.debug:
+                print("\tReading from path ", leaf)
             for bucket in transfer:
                 for block in bucket:
+                    if self.debug:
+                        print("\t\t", block.getLeaf(), block.getSegID(), block.getData())
                     if block.getSegID() != 0:
                         if block.getSegID() == segID:
                             self._posMap.delete(segID)
                         else:
                             self._stash.addNode(block)
                             #print(block.getSegID())
-            self._tree.writePath(leaf, self._stash.evict(leaf))
+                if self.debug:
+                    print("")
+            outPath = self._stash.evict(leaf)
+            if self.debug:				
+                print("\tWriting to path ", leaf)		
+                for bucket in outPath:
+                    for block in bucket:
+                        print("\t\t", block.getLeaf(), block.getSegID(), block.getData())
+                    print("")
+				
+            self._tree.writePath(leaf, outPath)
         #else:
             #print("request succeeded")

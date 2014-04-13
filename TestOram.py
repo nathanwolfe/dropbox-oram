@@ -35,7 +35,7 @@ def TestRepeatRW() :
 
 def TestGeneral() :
     oramsize = 15
-    oram = Oram.Oram(oramsize, 4, 100)
+    oram = Oram.Oram(oramsize, 1, 100)
     check  = {}
     N = 30
     numTests = 10000
