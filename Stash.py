@@ -25,7 +25,7 @@ class Stash:
         return "not found"
 
     def evict(self, leaf):            # returns list of the blocks that go in each node on the path as a 2d list, should compare IDs and return if found as well
-        numLevels = Util.levelNumber(leaf) + 1           # in which file would I find these?
+        numLevels = Util.levelNumber(leaf) + 1
         result = [0] * numLevels
         
         for i in range(numLevels):
@@ -34,12 +34,10 @@ class Stash:
         stashIter = 0
         while stashIter < len(self._nodes):                                  # put nodes in the list where 0th element is 0th level, etc.
             curLevel = Util.getMaxLevel(leaf, self._nodes[stashIter].getLeaf())
-            #treeNodeIter = 0
             nodeEvicted = False
 
             while curLevel > -1:
                 #print ("another test")
-                #treeNodeIter=0
                 for treeNodeIter in range(self._z):
                     #print (treeNodeIter)
                     #print (curLevel)
@@ -59,4 +57,4 @@ class Stash:
                 else:
                     break
 
-        return result        # this can be optimized I believe
+        return result

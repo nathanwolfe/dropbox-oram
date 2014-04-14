@@ -5,13 +5,14 @@ import Stash
 import PosMap
 
 class Oram:
-    def __init__(self, treeSize, z, segmentSize):
+    def __init__(self, treeSize, z, segmentSize, maxStashSize):
         self._z = z
         self._tree = Tree.Tree(treeSize, z, segmentSize)
         self._stash = Stash.Stash(z)
-        self._posMap = PosMap.PosMap()	
-        self.use_vcache = True
-		
+        self._posMap = PosMap.PosMap()
+        self._C = maxStashSize
+        
+        self.use_vcache = True	
         self.debug = False			
         
 		# TODO: wrap the common code (read/write paths and debug output)
@@ -60,6 +61,10 @@ class Oram:
             return readResult
         
     def write(self, segID, data):
+        if self._stash.getSize() > self._C:              # background eviction
+            # print("backEv")
+            self.read(self._tree.randomLeaf())
+        
         if isinstance(data, str):
             data = data.encode("utf-8")
         reqResult = self._stash.request(segID)
