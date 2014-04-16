@@ -13,7 +13,7 @@ class Oram:
         self._c = maxStashSize
         
         self.useVCache = True	
-        self.debug = True			
+        self.debug = False			
         
 		# Comment: You may find it helpful to print out stash content when debugging
 		
@@ -40,7 +40,7 @@ class Oram:
         else:
             leaf = self._posMap.lookup(segID)
             if leaf == -1:
-                #assert (action == "write"), "tried to " + action + " nonexistent segID"
+                assert (action == "write"), "tried to " + action + " nonexistent segID"
                 leaf = self._tree.randomLeaf()
             transfer = self._tree.readPath(leaf)
             result = b""
