@@ -68,13 +68,13 @@ def TestGeneral() :
             check[key] = data
 
         elif (operation <.6):
-            try:
-				# TODO: should not read a non-existent key. Check before you read. Better still, if it does not exist, make an insert operation
-                getValue = oram.read(key).decode("utf-8")	
-                assert (getValue == check[key])
-            except:
-                print( "[TestGeneral] key=%d. expecting %s but got %s" % (key, check[key], getValue) )
-                return
+            if (check[key] != ""):
+                try:
+                    getValue = oram.read(key).decode("utf-8")	
+                    assert (getValue == check[key])
+                except:
+                    print( "[TestGeneral] key=%d. expecting %s but got %s" % (key, check[key], getValue) )
+                    return
 
         else:
             if (check[key] != ""):
