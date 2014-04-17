@@ -15,6 +15,8 @@ def readBucket(bucketID, maxDataLength):
         data = inputFile.read(dataLength)
         inputFile.read(maxDataLength - dataLength)
         result.append(Block.Block(int.from_bytes(leafBytes, byteorder = "little"), int.from_bytes(segIDBytes, byteorder = "little"), data))
+
+    inputFile.close()
     return result
 
 def writeBucket(bucketID, blocks, maxDataLength):
@@ -29,3 +31,5 @@ def writeBucket(bucketID, blocks, maxDataLength):
         outputFile.write(dataLength.to_bytes(4, byteorder = "little"))
         outputFile.write(block.getData())
         outputFile.write(bytes(maxDataLength - dataLength))   # fill up empty space
+
+        outputFile.close()
