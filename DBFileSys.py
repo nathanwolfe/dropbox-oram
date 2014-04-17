@@ -32,4 +32,4 @@ def writeBucket(bucketID, blocks, maxDataLength):
         outputFile.write(block.getData())
         outputFile.write(bytes(maxDataLength - dataLength))   # fill up empty space
 
-        outputFile.close()
+    outputFile.close()
