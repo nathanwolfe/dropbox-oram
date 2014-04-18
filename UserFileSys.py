@@ -6,7 +6,9 @@ class UserFileSys:
         self._segSizeMap = {}          # holds number of segments in file
         self._segIDMap = {}         # holds segIDs of the file segments
         self._segSize = segSize
-        self._curSegID = 0
+        self._curSegID = 1
+
+        self.debug = False
 
     def write(self, userFileName):
         readFile = open(userFileName, "rb")
@@ -15,6 +17,9 @@ class UserFileSys:
             dataSeg = readFile.read(self._segSize)
             if not dataSeg:
                 break            # break the loop once end of file is reached
+
+            if self.debug:
+                print ("segName: " + str(userFileName + "_" + str(segNum)))
             self._segIDMap[userFileName + "_" + str(segNum)] = self._curSegID
             self._Oram.write(self._segIDMap[userFileName + "_" + str(segNum)], dataSeg)
             self._curSegID += 1
@@ -24,20 +29,29 @@ class UserFileSys:
         readFile.close()
 
     def read(self, userFileName):
-        numSegments = self._segSizeMap[userFileName]
-        result = b""
-        for segNum in range(numSegments):
-            print("testing")
-            result += self._Oram.read(self._segIDMap[userFileName + "_" + str(segNum)])
+        if userFileName in self._segSizeMap:
+            numSegments = self._segSizeMap[userFileName]
+            result = b""
+            for segNum in range(numSegments):
+                if self.debug:
+                    print ("READING FILE " + str(self._segIDMap[userFileName + "_" + str(segNum)]))
+                    print (self._Oram.read(self._segIDMap[userFileName + "_" + str(segNum)]))
+                result += self._Oram.read(self._segIDMap[userFileName + "_" + str(segNum)])
+            return result
 
-        return result
+        else:
+            print ("Reading nonexistent file...")
 
     def delete(self, userFileName):
-        numSegments = self._segSizeMap[userFileName]
-        for segNum in range(numSegments):
-            self._Oram.delete(self._segIDMap[userFileName + "_" + str(segNum)])
+        if userFileName in self._segSizeMap:
+            numSegments = self._segSizeMap[userFileName]
+            for segNum in range(numSegments):
+                self._Oram.delete(self._segIDMap[userFileName + "_" + str(segNum)])
+        
+            del self._segSizeMap[userFileName]
 
-        del self._segSizeMap[userFileName]
+        else:
+            print ("Deleting nonexistent file...")
 
 test = UserFileSys(100, 3, 3000, 10)
 test.write("Birds.jpg")
