@@ -11,6 +11,7 @@ import DBFileSys
 class Tree:
     def __init__(self, nodeNumber, z, segmentSize):
         self._size = nodeNumber
+        self._z = z
         self._segmentSize = segmentSize
         for i in range(1, nodeNumber + 1):
             self.writeBucket(i, [Block.Block(0, 0, b"")] * z)
@@ -30,3 +31,9 @@ class Tree:
     def writePath(self, leaf, blocks):
         for addr in Util.getPathNodes(leaf):
             self.writeBucket(addr, blocks.pop(0))
+
+    def grow(self, numLeaves):
+        for i in range(self._size + 1, self._size + numLeaves + 1):
+            self.writeBucket(i, [Block.Block(0, 0, b"")] * self._z)
+        self._size += numLeaves
+            

@@ -58,3 +58,9 @@ class Stash:
                     break
 
         return result
+
+    def correctLeaves(self, treeSize):
+        for node in self._nodes:
+            newLeaf = Util.correctLeaf(node.getLeaf(), treeSize)
+            if newLeaf != None:
+                node.setLeaf(newLeaf)

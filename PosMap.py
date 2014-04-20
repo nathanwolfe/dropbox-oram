@@ -1,15 +1,23 @@
+import Util
+
 class PosMap :
 	
 	def __init__(self):
-		self._pos_map = {}
+		self._posMap = {}
 
 	def lookup(self, key) :
-		if not key in self._pos_map :
+		if not key in self._posMap:
 			return -1
-		return self._pos_map[key]
+		return self._posMap[key]
 
-	def insert(self, key, value) :
-		self._pos_map[key] = value
+	def insert(self, key, value):
+		self._posMap[key] = value
 
 	def delete(self, key):
-		del self._pos_map[key]
+		del self._posMap[key]
+
+	def correctLeaves(self, treeSize):
+		for key in self._posMap:
+			newLeaf = Util.correctLeaf(self._posMap[key], treeSize)
+			if newLeaf != None:
+				self._posMap[key] = newLeaf
