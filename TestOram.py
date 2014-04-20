@@ -34,18 +34,26 @@ def TestRepeatRW() :
     
 
 def TestGeneral() :
-    oramsize = 100
+    
+	# Check: The following parameter seems to trigger an assertion
+	
+    random.seed(0)	# this guarantees we get the same random numbers, and thus same results on every run
+					# Comment: When you fixed this bug, remove the previous line so you can test with random input again.
+	
+    oramsize = 50
     z = 1
-    maxStashSize = 10
+    maxStashSize = 3
     segSize = 100
     oram = Oram.Oram(oramsize, z, segSize, maxStashSize)
     
     check  = {}
-    numKeys = 50
+    numKeys = 30
     numTests = 1000
     
     lastStashSize = 0
     currentStashSize = 0
+	
+    
 	
     for key in range(1, numKeys) :                 # writes a "random" string to each key from 0 to N
         data = "v" + str(random.randint(1,1000))
