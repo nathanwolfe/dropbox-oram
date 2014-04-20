@@ -17,7 +17,9 @@ class Oram:
         
 		# Comment: You may find it helpful to print out stash content when debugging
 		
-    def access(self, action, segID, data):
+    def access(self, action, segID, data):		
+		# Comment: also need back ground eviction on a read operation       
+		# TODO: try to get the background eviction rate under different Z and tree size	
         while action == "write" and self._stash.getSize() > self._c:              # background eviction
             if self.debug:
                 print("backEv")
@@ -26,6 +28,7 @@ class Oram:
             data = data.encode("utf-8")
         reqResult = self._stash.request(segID)
         if reqResult != "not found":
+			# TODO: maintain some statistics on the hit rate of this optimization		
             if self.debug:
                 print("found in stash")
             if action == "write":
@@ -46,6 +49,8 @@ class Oram:
             result = b""
             if self.debug:
                 print("\treading from path ", leaf)
+					
+			# Comment: may be cleaner to put this in a function like readPath()
             for bucket in transfer:
                 for block in bucket:
                     if self.debug:
@@ -68,6 +73,7 @@ class Oram:
                             self._stash.addNode(block)
                 if self.debug:
                     print("")
+			
             if result == b"" and action == "write":
                 newBlock = Block.Block(self._tree.randomLeaf(), segID, data)
                 self._stash.addNode(newBlock)
