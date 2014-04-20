@@ -40,7 +40,7 @@ class Oram:
         else:
             leaf = self._posMap.lookup(segID)
             if leaf == -1:
-                assert (action == "write"), "tried to " + action + " nonexistent segID"
+                assert (action == "write" and segID > 0), "tried to " + action + " nonexistent segID"
                 leaf = self._tree.randomLeaf()
             transfer = self._tree.readPath(leaf)
             result = b""
