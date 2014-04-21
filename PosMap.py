@@ -1,23 +1,27 @@
 import Util
+import random
 
 class PosMap :
 
     def __init__(self):
         self._posMap = {}
 
-    def lookup(self, key) :
-        if not key in self._posMap:
+    def lookup(self, segID) :
+        if not segID in self._posMap:
             return -1
-        return self._posMap[key]
+        return self._posMap[segID]
 
-    def insert(self, key, value):
-        self._posMap[key] = value
+    def insert(self, segID, leaf):
+        self._posMap[segID] = leaf
 
-    def delete(self, key):
-        del self._posMap[key]
+    def delete(self, segID):
+        del self._posMap[segID]
 
     def correctLeaves(self, treeSize):
-        for key in self._posMap:
-            newLeaf = Util.correctLeaf(self._posMap[key], treeSize, key % 2)
+        for segID in self._posMap:
+            newLeaf = Util.correctLeaf(self._posMap[segID], treeSize, segID % 2)
             if newLeaf != None:
-                self._posMap[key] = newLeaf
+                self._posMap[segID] = newLeaf
+
+    def randomSegID(self):
+        return random.choice(list(self._posMap.keys()))

@@ -37,17 +37,18 @@ def TestGeneral() :
     
 	# Check: The following parameter seems to trigger an assertion
 	
-    random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
+    #random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
 					# Comment: When you fixed this bug, remove the previous line so you can test with random input again.
 	
-    oramsize = 50
-    z = 1
+    oramsize = 63
+    minoramsize = 7
+    z = 3
     maxStashSize = 3
     segSize = 100
     oram = Oram.Oram(oramsize, z, segSize, maxStashSize)
     
     check  = {}
-    numKeys = 30
+    numKeys = 128
     numTests = 1000
     
     lastStashSize = 0
@@ -72,6 +73,10 @@ def TestGeneral() :
         key = random.randint(1, numKeys-1)
         if ((operation * 10) % 1 < .1):
             oram.grow(2)
+            oramsize += 2
+        elif ((operation * 10) % 1 < .2 and oramsize > minoramsize):
+            oram.shrink(2)
+            oramsize -= 2
         if (operation < .2):
             data = "x" + str(random.randint(1,1000))
             oram.write(key, data)
@@ -93,7 +98,7 @@ def TestGeneral() :
         
         currentStashSize = oram._stash.getSize()
         print ("ORAM Stash Size: ", currentStashSize)		
-        if 	currentStashSize - lastStashSize > 1:
+        if currentStashSize - lastStashSize > 1 and (operation * 10) % 1 >= .2:
             print("Stash increases by more than 1")			
             exit(0)	
         lastStashSize = currentStashSize

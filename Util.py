@@ -35,12 +35,11 @@ def getPathNodes(leaf):           # returns a list of node numbers that are on t
     return result
 
 def correctLeaf(leaf, treeSize, bit):
-    changed = False
-    while leaf < int(treeSize / 2) + 1:
-        leaf = ((leaf * 2) + bit)
-        changed = True
-    while leaf > treeSize:
-        leaf = (int(leaf / 2))
-        changed = True
-    if changed:
-        return leaf
+    assert (leaf != 0), "0 leaf"
+    newLeaf = leaf
+    while newLeaf < int(treeSize / 2) + 1:
+        newLeaf = (newLeaf * 2) + bit
+    while newLeaf > treeSize:
+        newLeaf = int(newLeaf / 2)
+    if newLeaf != leaf:
+        return newLeaf

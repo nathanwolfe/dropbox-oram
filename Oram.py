@@ -13,17 +13,17 @@ class Oram:
         self._c = maxStashSize
         
         self.useVCache = True	
-        self.debug = False			
+        self.debug = True			
         
 		# Comment: You may find it helpful to print out stash content when debugging
 		
     def access(self, action, segID, data):		
 		# Comment: also need back ground eviction on a read operation       
-		# TODO: try to get the background eviction rate under different Z and tree size	
-        while action == "write" and self._stash.getSize() > self._c:              # background eviction
+		# TODO: try to get the background eviction rate under different Z and tree size
+        while (action == "read" or action == "write") and self._stash.getSize() > self._c:              # background eviction
             if self.debug:
                 print("backEv")
-            self.access("backEv", 0, None)
+            self.access("backEv", self._posMap.randomSegID(), None)
         if isinstance(data, str):
             data = data.encode("utf-8")
         reqResult = self._stash.request(segID)
@@ -43,7 +43,7 @@ class Oram:
         else:
             leaf = self._posMap.lookup(segID)
             if leaf == -1:
-                assert ((action == "write" and segID > 0) or action == "backEv"), "tried to " + action + " nonexistent segID"
+                assert (action == "write" and segID > 0), "tried to " + action + " nonexistent segID"
                 leaf = self._tree.randomLeaf()
             transfer = self._tree.readPath(leaf)
             result = b""
@@ -100,5 +100,14 @@ class Oram:
     def grow(self, numLeaves):
         assert (numLeaves > 0 and numLeaves % 2 == 0), "illegal growth amount"
         self._tree.grow(numLeaves)
+        self._stash.correctLeaves(self._tree.getSize())
+        self._posMap.correctLeaves(self._tree.getSize())
+
+    def shrink(self, numLeaves):
+        assert (numLeaves > 0 and numLeaves % 2 == 0), "illegal shrinkage amount"
+        dump = self._tree.shrink(numLeaves)
+        for block in dump:
+            if block.getSegID() != 0:
+                self._stash.addNode(block)
         self._stash.correctLeaves(self._tree.getSize())
         self._posMap.correctLeaves(self._tree.getSize())
