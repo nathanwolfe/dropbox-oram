@@ -37,7 +37,7 @@ def TestGeneral() :
     
 	# Check: The following parameter seems to trigger an assertion
 	
-    random.seed(0)	# this guarantees we get the same random numbers, and thus same results on every run
+    random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
 					# Comment: When you fixed this bug, remove the previous line so you can test with random input again.
 	
     oramsize = 50
@@ -70,6 +70,8 @@ def TestGeneral() :
     for i in range(0, numTests):        # does a random operation
         operation = random.random()
         key = random.randint(1, numKeys-1)
+        if ((operation * 10) % 1 < .1):
+            oram.grow(2)
         if (operation < .2):
             data = "x" + str(random.randint(1,1000))
             oram.write(key, data)

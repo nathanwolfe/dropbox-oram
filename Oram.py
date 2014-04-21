@@ -56,9 +56,6 @@ class Oram:
                     if self.debug:
                         print("\t\t", block.getLeaf(), block.getSegID(), block.getData())
                     if block.getSegID() != 0:
-                        newLeaf = Util.correctLeaf(block.getLeaf(), self._tree.getSize())
-                        if newLeaf != None:
-                            block.setLeaf(newLeaf)
                         if block.getSegID() == segID:
                             result = block.getData()
                             if action == "write":
@@ -70,6 +67,7 @@ class Oram:
                             else:
                                 self._posMap.delete(segID)
                         else:
+                            block.setLeaf(self._posMap.lookup(block.getSegID()))
                             self._stash.addNode(block)
                 if self.debug:
                     print("")

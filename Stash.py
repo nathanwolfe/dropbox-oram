@@ -61,6 +61,6 @@ class Stash:
 
     def correctLeaves(self, treeSize):
         for node in self._nodes:
-            newLeaf = Util.correctLeaf(node.getLeaf(), treeSize)
+            newLeaf = Util.correctLeaf(node.getLeaf(), treeSize, node.getSegID() % 2)
             if newLeaf != None:
                 node.setLeaf(newLeaf)
