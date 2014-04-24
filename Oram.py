@@ -11,8 +11,8 @@ class Oram:
         self._stash = Stash.Stash(z)
         self._posMap = PosMap.PosMap()
         self._c = maxStashSize
-        
-        self.useVCache = True	
+
+        self.useVCache = True
         self.debug = True			
         
 		# Comment: You may find it helpful to print out stash content when debugging
