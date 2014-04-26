@@ -40,15 +40,15 @@ def TestGeneral() :
     #random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
 					# Comment: When you fixed this bug, remove the previous line so you can test with random input again.
 	
-    oramsize = 63
-    minoramsize = 7
+    oramsize = 1
+    #minoramsize = 7
     z = 3
     maxStashSize = 3
     segSize = 100
-    oram = Oram.Oram(oramsize, z, segSize, maxStashSize)
+    oram = Oram.Oram(oramsize, z, segSize, maxStashSize, 1.8, 2, 2.2)
     
     check  = {}
-    numKeys = 128
+    numKeys = 1000
     numTests = 1000
     
     lastStashSize = 0
@@ -62,7 +62,7 @@ def TestGeneral() :
         check[key] = data	
 		
         currentStashSize = oram._stash.getSize()
-        print ("ORAM Stash Size: ", currentStashSize)		
+        #print ("ORAM Stash Size: ", currentStashSize)		
         if 	currentStashSize - lastStashSize > 1:
             print("Stash increases by more than 1")			
             exit(0)
@@ -71,12 +71,12 @@ def TestGeneral() :
     for i in range(0, numTests):        # does a random operation
         operation = random.random()
         key = random.randint(1, numKeys-1)
-        if ((operation * 10) % 1 < .1):
-            oram.grow(2)
-            oramsize += 2
-        elif ((operation * 10) % 1 < .2 and oramsize > minoramsize):
-            oram.shrink(2)
-            oramsize -= 2
+        # if ((operation * 10) % 1 < .1):
+        #     oram.grow(2)
+        #     oramsize += 2
+        # elif ((operation * 10) % 1 < .2 and oramsize > minoramsize):
+        #     oram.shrink(2)
+        #     oramsize -= 2
         if (operation < .2):
             data = "x" + str(random.randint(1,1000))
             oram.write(key, data)
@@ -97,13 +97,15 @@ def TestGeneral() :
                 check[key] = ""
         
         currentStashSize = oram._stash.getSize()
-        print ("ORAM Stash Size: ", currentStashSize)		
-        if currentStashSize - lastStashSize > 1 and (operation * 10) % 1 >= .2:
-            print("Stash increases by more than 1")			
-            exit(0)	
+        #print ("ORAM Stash Size: ", currentStashSize)		
+        # if currentStashSize - lastStashSize > 1:
+        #     print("Stash increases by more than 1")			
+        #     exit(0)
+            
         lastStashSize = currentStashSize
         
-    print ("TestGeneral Passed")
+    print("final stash size:", currentStashSize)
+    print("TestGeneral Passed")
 
 def TestBackEv():
     oramsize = 101
