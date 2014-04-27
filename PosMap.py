@@ -25,3 +25,9 @@ class PosMap :
 
     def randomSegID(self):
         return random.choice(list(self._posMap.keys()))
+
+    def setMap(self, dictionary):
+        self._posMap = dictionary
+
+    def getMap(self):
+        return self._posMap

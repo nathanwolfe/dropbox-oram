@@ -16,6 +16,12 @@ class Stash:
     def deleteNode(self, index):
         del self._nodes[index]
 
+    def getNodes(self):
+        return self._nodes
+
+    def setNodes(self, someList):
+        self._nodes = someList
+
     def request(self, segID):
         
         for i in range(len(self._nodes)):

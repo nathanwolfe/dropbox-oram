@@ -144,3 +144,15 @@ class Oram:
                 self._stash.addNode(block)
         self._stash.correctLeaves(self._tree.getSize())
         self._posMap.correctLeaves(self._tree.getSize())
+
+    def setPosMap(self, dictionary):
+        self._posMap.setMap(dictionary)
+
+    def getPosMap(self):
+        return self._posMap
+
+    def setStash(self, nodes):
+        self._stash.setNodes(nodes)
+
+    def getStash(self):
+        return self._stash
