@@ -31,15 +31,13 @@ class Oram:
         while (action == "read" or action == "write") and self._stash.getSize() > self._c:              # background eviction
             if self.debug:
                 print("backEv")
-            self.access("backEv", self._posMap.randomSegID(), None)
+            self.access("backEv", 0, None)
 
         if self.autoResize == True and self._segCounter != 0:
             currentR = (self._tree.getSize() * self._z) / self._segCounter
             if currentR < self._growR:
-                print(currentR)
                 self.grow(int(((self._targetR - currentR) * self._segCounter) / self._z))
             elif currentR > self._shrinkR:
-                print(currentR)
                 self.shrink(int(((currentR - self._targetR) * self._segCounter) / self._z))
         
         if isinstance(data, str):
@@ -62,7 +60,7 @@ class Oram:
     def treeAccess(self, action, segID, data):
         leaf = self._posMap.lookup(segID)
         if leaf == -1:
-            assert (action == "write" and segID > 0), "tried to " + action + " nonexistent segID"
+            assert ((action == "write" and segID > 0) or action == "backEv"), "tried to " + action + " nonexistent segID"
             leaf = self._tree.randomLeaf()
         transfer = self._tree.readPath(leaf)
         result = b""
@@ -78,9 +76,10 @@ class Oram:
                         result = block.getData()
                         if action == "write":
                             block.setData(data)
-                        if action != "delete":
+                        if action == "read" or action == "write":
                             block.setLeaf(self._tree.randomLeaf())
                             self._posMap.insert(segID, block.getLeaf())
+                        if action != "delete":
                             self._stash.addNode(block)
                         else:
                             self._posMap.delete(segID)
@@ -124,8 +123,8 @@ class Oram:
         assert (numLeaves > 0), "illegal growth amount"
         if numLeaves % 2 == 1:
             numLeaves -= 1
-        #if self.debug:
-        print("growing by", numLeaves)
+        if self.debug:
+            print("growing by", numLeaves)
         self._tree.grow(numLeaves)
         self._stash.correctLeaves(self._tree.getSize())
         self._posMap.correctLeaves(self._tree.getSize())
@@ -136,8 +135,8 @@ class Oram:
         assert (numLeaves > 0), "illegal shrinkage amount"
         if numLeaves % 2 == 1:
             numLeaves -= 1
-        #if self.debug:
-        print("shrinking by", numLeaves)
+        if self.debug:
+            print("shrinking by", numLeaves)
         dump = self._tree.shrink(numLeaves)
         for block in dump:
             if block.getSegID() != 0:
