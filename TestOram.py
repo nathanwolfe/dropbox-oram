@@ -108,7 +108,7 @@ def TestGeneral() :
     print("TestGeneral Passed")
 
 def TestBackEv():
-    oramsize = 101
+    oramsize = 4095
     segSize = 100
     z = 2
     
@@ -118,20 +118,20 @@ def TestBackEv():
     print ("z = " + str(z) + ", oram size = " + str(oramsize))
     numKeys = int(oramsize*z / 2)
     for maxStashSize in range(5, 50, 5):
-        oram = Oram.Oram(oramsize, z, segSize, maxStashSize)
+        oram = Oram.Oram(oramsize, z, segSize, maxStashSize, 1.8, 2.0, 2.2)
         numBackEv = 0
         for key in range(1, numKeys+1) :                 # writes a "random" string to each key from 0 to N
             while (oram._stash.getSize() > oram._c):
-                oram.access("backEv", oram._posMap.randomSegID(), None)
+                oram.access("backEv", 0, None)
                 #print ("backEv")
                 numBackEv+=1
             data = "v" + str(random.randint(1,1000))
             oram.write(key, data)			
         
         for i in range (oramsize*2):
-            key = random.randint(1, numKeys)
+            key = i%numKeys + 1
             while (oram._stash.getSize() > oram._c):
-                oram.access("backEv", oram._posMap.randomSegID(), None)
+                oram.access("backEv", 0, None)
                 numBackEv+=1
             oram.read(key)
 
@@ -140,5 +140,5 @@ def TestBackEv():
     
 #TestBasic()
 # TestRepeatRW()
-TestGeneral()
-#TestBackEv()
+#TestGeneral()
+TestBackEv()

@@ -67,7 +67,7 @@ class UserFileSys:
         self._segSizeMap = DBFileSys.readDictionary("segSizeMap")
         self._segIDMap = DBFileSys.readDictionary("segIDMap")
 
-test = UserFileSys(101, 3, 3000, 10, 1.8, 2.0, 2.2)
+"""test = UserFileSys(101, 3, 3000, 10, 1.8, 2.0, 2.2)
 test.write("Birds.jpg")
 test.writeEverything()
 test.readEverything()
@@ -76,4 +76,4 @@ pic = test.read("Birds.jpg")
 #print ("checkpoint")
 output = open("file.jpg", "wb")
 output.write(pic)
-output.close()
+output.close()"""

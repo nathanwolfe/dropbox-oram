@@ -1,10 +1,14 @@
 import os
 import Block
 
+from os.path import expanduser
+home = expanduser("~")
+#print (home)
+
 def readBucket(bucketID, maxDataLength):
-    if not os.path.exists("buckets"):
-        os.makedirs("buckets")
-    inputFile = open("buckets/" + str(bucketID), "rb")         # rb = read binary
+    if not os.path.exists(home + "/Dropbox/buckets"):
+        os.makedirs(home + "/Dropbox/buckets")
+    inputFile = open(home + "/Dropbox/buckets/" + str(bucketID), "rb")         # rb = read binary
     result = []
     while True:
         leafBytes = inputFile.read(4)
@@ -20,23 +24,23 @@ def readBucket(bucketID, maxDataLength):
     return result
 
 def writeBucket(bucketID, blocks, maxDataLength):
-    if not os.path.exists("buckets"):
-        os.makedirs("buckets")
-    outputFile = open("buckets/" + str(bucketID), "wb")        # wb = write binary
+    if not os.path.exists(home + "/Dropbox/buckets"):
+        os.makedirs(home + "/Dropbox/buckets")
+    outputFile = open(home + "/Dropbox/buckets/" + str(bucketID), "wb")        # wb = write binary
     for block in blocks:
         writeBlock(outputFile, block, maxDataLength)
         
     outputFile.close()
 
 def writeStash(stash, maxDataLength):      # stash is a list of nodes in the stash
-    outputFile = open("stash", "wb")
+    outputFile = open(home + "/Dropbox/stash", "wb")
     for block in stash:
         writeBlock(outputFile, block, maxDataLength)
 
     outputFile.close()
 
 def readStash(maxDataLength):         # returns a list where each element is a block in the stash
-    inputFile = open("stash", "rb")
+    inputFile = open(home + "/Dropbox/stash", "rb")
     result = []
     while True:
         #print ("loop")
@@ -55,7 +59,7 @@ def readStash(maxDataLength):         # returns a list where each element is a b
     return result
 
 def writeDictionary(fileName, dictionary):
-    outputFile = open(fileName, "wb")
+    outputFile = open(home+ "/Dropbox/" + fileName, "wb")
     for i in range(len(dictionary)):
         key, value = dictionary.popitem()
         if fileName == "posMap":
@@ -70,7 +74,7 @@ def writeDictionary(fileName, dictionary):
     outputFile.close()
 
 def readDictionary(fileName):
-    inputFile = open(fileName, "rb")
+    inputFile = open(home + "/Dropbox/" + fileName, "rb")
     result = {}
     while True:
         if fileName == "posMap":
