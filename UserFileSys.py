@@ -62,10 +62,15 @@ class UserFileSys:
         DBFileSys.writeDictionary("segIDMap", self._segIDMap)
 
     def readEverything(self):
-        self._Oram.setStash(DBFileSys.readStash(self._segSize))
-        self._Oram.setPosMap(DBFileSys.readDictionary("posMap"))
-        self._segSizeMap = DBFileSys.readDictionary("segSizeMap")
-        self._segIDMap = DBFileSys.readDictionary("segIDMap")
+        if DBFileSys.readStash(self._segSize) == "new ORAM":    # if the files don't exist yet, then write everything
+            self.writeEverything()
+            self.readEverything()
+            print ("New ORAM Created")
+        else:
+            self._Oram.setStash(DBFileSys.readStash(self._segSize))
+            self._Oram.setPosMap(DBFileSys.readDictionary("posMap"))
+            self._segSizeMap = DBFileSys.readDictionary("segSizeMap")
+            self._segIDMap = DBFileSys.readDictionary("segIDMap")
 
 """test = UserFileSys(101, 3, 3000, 10, 1.8, 2.0, 2.2)
 test.write("Birds.jpg")

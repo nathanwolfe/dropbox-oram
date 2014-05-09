@@ -40,6 +40,8 @@ def writeStash(stash, maxDataLength):      # stash is a list of nodes in the sta
     outputFile.close()
 
 def readStash(maxDataLength):         # returns a list where each element is a block in the stash
+    if not os.path.exists(home + "/Dropbox/stash"):
+        return "new ORAM"
     inputFile = open(home + "/Dropbox/stash", "rb")
     result = []
     while True:
