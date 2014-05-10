@@ -1,5 +1,9 @@
 import Oram
+import UserFileSys
 import random
+import time
+import os
+import shutil
 
 def TestBasic() :
     oramsize = 1 << 4 - 1
@@ -137,8 +141,41 @@ def TestBackEv():
 
         print ("\tMax Stash Size = " + str(maxStashSize) + ": dummy- " + str(numBackEv) + ", actual- " + str(2*oramsize + numKeys))
         print ("\t\tRatio = " + str(numBackEv / (2*oramsize + numKeys)))
+
+def ORAMvsNormal():
+    from os.path import expanduser
+    home = expanduser("~")
+
+    fileName = "Birds.jpg"
+    oram = UserFileSys.UserFileSys(3, 3, 3000, 10, 1.8, 2.0, 2.2)
+    total = 0
+    numTests = 2000
+    for i in range(numTests):
+        start = time.clock()
+        oram.write(fileName)
+        oram.read(fileName)
+        oram.delete(fileName)
+        timeTaken = time.clock() - start
+        print(timeTaken)
+        #print(oram._Oram._tree.getSize())
+        
+        total += timeTaken
+
+    avg = total / numTests
+    print ("Average time taken with ORAM for file " + fileName + ": " + str(avg))
+
+    total = 0
+    for i in range(numTests):
+        start = time.clock()
+        shutil.copyfile(fileName, home + "/Dropbox/test.jpg")
+        total += (time.clock()-start)
+    avg = total/numTests
+    print ("Average time taken without ORAM for file " + fileName + ": " + str(avg))
+    
+    
     
 #TestBasic()
 # TestRepeatRW()
 #TestGeneral()
-TestBackEv()
+#TestBackEv()
+ORAMvsNormal()

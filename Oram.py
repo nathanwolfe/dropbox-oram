@@ -19,7 +19,7 @@ class Oram:
         self._segCounter = 0
 
         self.autoResize = True
-        self.showResize = True
+        self.showResize = False
 
         self.useVCache = True
         self.debug = False			
