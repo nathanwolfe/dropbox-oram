@@ -21,7 +21,7 @@ class Oram:
         self.autoResize = True
         self.showResize = True
 
-        self.useVCache = False
+        self.useVCache = True
         self.debug = False			
         
 		# Comment: You may find it helpful to print out stash content when debugging
@@ -64,7 +64,7 @@ class Oram:
     def treeAccess(self, action, segID, data):
         leaf = self._posMap.lookup(segID)
         if leaf == -1:
-            assert ((action == "write" and segID > 0) or action == "backEv"), "tried to " + action + " nonexistent segID"
+            assert ((action == "write" and segID > 0) or action == "backEv" or action == "dummy"), "tried to " + action + " nonexistent segID"
             leaf = self._tree.randomLeaf()
         transfer = self._tree.readPath(leaf)
         result = b""
