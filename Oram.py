@@ -19,6 +19,7 @@ class Oram:
         self._segCounter = 0
 
         self.autoResize = True
+        self.showResize = True
 
         self.useVCache = False
         self.debug = False			
@@ -51,6 +52,9 @@ class Oram:
                 reqResult.setData(data)
             if action != "delete":
                 self._stash.addNode(reqResult)
+            else:
+                self._posMap.delete(segID)
+                self._segCounter -= 1
             if self.useVCache == False:
                 self.treeAccess("dummy", segID, data)
             return reqResult.getData()
@@ -123,7 +127,7 @@ class Oram:
         assert (numLeaves > 0), "illegal growth amount"
         if numLeaves % 2 == 1:
             numLeaves -= 1
-        if self.debug:
+        if self.showResize:
             print("growing by", numLeaves)
         self._tree.grow(numLeaves)
         self._stash.correctLeaves(self._tree.getSize())
@@ -135,7 +139,7 @@ class Oram:
         assert (numLeaves > 0), "illegal shrinkage amount"
         if numLeaves % 2 == 1:
             numLeaves -= 1
-        if self.debug:
+        if self.showResize:
             print("shrinking by", numLeaves)
         dump = self._tree.shrink(numLeaves)
         for block in dump:
