@@ -146,10 +146,10 @@ def ORAMvsNormal():
     from os.path import expanduser
     home = expanduser("~")
 
-    fileName = "Birds.jpg"
+    fileName = "M2U00725.MPG"
     oram = UserFileSys.UserFileSys(3, 3, 3000, 10, 1.8, 2.0, 2.2)
     total = 0
-    numTests = 2000
+    numTests = 10
     for i in range(numTests):
         start = time.clock()
         oram.write(fileName)
@@ -167,15 +167,31 @@ def ORAMvsNormal():
     total = 0
     for i in range(numTests):
         start = time.clock()
-        shutil.copyfile(fileName, home + "/Dropbox/test.jpg")
+        shutil.copyfile(fileName, home + "/Dropbox/test.MPG")
         total += (time.clock()-start)
     avg = total/numTests
     print ("Average time taken without ORAM for file " + fileName + ": " + str(avg))
     
-    
+def TestSegSize():
+    fileName = "Zou- Mathematics Solutions.pdf"
+    numTests = 10
+    for segSize in range(1000, 80000, 2000):
+        total = 0
+        oram = UserFileSys.UserFileSys(101, 3, segSize, 10, 1.8, 2.0, 2.2)
+        for i in range(numTests):
+            start = time.clock()
+            oram.write(fileName)
+            oram.read(fileName)
+            oram.delete(fileName)
+            timeTaken = time.clock() - start
+            total+=timeTaken
+        avg = total / numTests
+        print("Time taken with segSize " + str(segSize) + ": " + str(avg))
+        
     
 #TestBasic()
-# TestRepeatRW()
+#TestRepeatRW()
 #TestGeneral()
 #TestBackEv()
 ORAMvsNormal()
+#TestSegSize()
