@@ -10,6 +10,11 @@ import DBFileSys
 
 class Tree:
     def __init__(self, nodeNumber, z, segmentSize):
+        self.useRAM = True
+            
+        if self.useRAM:
+            self._buckets = [0] * nodeNumber
+        
         assert (nodeNumber % 2 == 1), "tree must have odd number of buckets"
         self._size = nodeNumber
         self._z = z
@@ -24,9 +29,18 @@ class Tree:
         return random.randint(int(self._size / 2) + 1, self._size)
     
     def readBucket(self, bucketID):
-        return DBFileSys.readBucket(bucketID, self._segmentSize)
+        if self.useRAM:
+            return self._buckets[bucketID - 1]
+        else:
+            return DBFileSys.readBucket(bucketID, self._segmentSize)
     def writeBucket(self, bucketID, blocks):
-        DBFileSys.writeBucket(bucketID, blocks, self._segmentSize)
+        if self.useRAM:
+            if bucketID > len(self._buckets):
+                self._buckets.append(blocks)
+            else:
+                self._buckets[bucketID - 1] = blocks
+        else:
+            DBFileSys.writeBucket(bucketID, blocks, self._segmentSize)
     
     def readPath(self, leaf):
         result = []
