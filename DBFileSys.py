@@ -5,10 +5,15 @@ from os.path import expanduser
 home = expanduser("~")
 #print (home)
 
+bucketLoc = "/Dropbox/buckets/"
+useSync = True
+if useSync == False:
+    bucketLoc = "/Documents/buckets/"
+
 def readBucket(bucketID, maxDataLength):
-    if not os.path.exists(home + "/Dropbox/buckets"):
-        os.makedirs(home + "/Dropbox/buckets")
-    inputFile = open(home + "/Dropbox/buckets/" + str(bucketID), "rb")         # rb = read binary
+    if not os.path.exists(home + bucketLoc):
+        os.makedirs(home + bucketLoc)
+    inputFile = open(home + bucketLoc + str(bucketID), "rb")         # rb = read binary
     result = []
     while True:
         leafBytes = inputFile.read(4)
@@ -24,9 +29,9 @@ def readBucket(bucketID, maxDataLength):
     return result
 
 def writeBucket(bucketID, blocks, maxDataLength):
-    if not os.path.exists(home + "/Dropbox/buckets"):
-        os.makedirs(home + "/Dropbox/buckets")
-    outputFile = open(home + "/Dropbox/buckets/" + str(bucketID), "wb")        # wb = write binary
+    if not os.path.exists(home + bucketLoc):
+        os.makedirs(home + bucketLoc)
+    outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
     for block in blocks:
         writeBlock(outputFile, block, maxDataLength)
         
