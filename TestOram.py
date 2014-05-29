@@ -4,6 +4,7 @@ import random
 import time
 import os
 import shutil
+import cProfile
 
 def TestBasic() :
     oramsize = 1 << 4 - 1
@@ -146,17 +147,17 @@ def ORAMvsNormal():
     from os.path import expanduser
     home = expanduser("~")
 
-    fileName = "M2U00725.MPG"
+    fileName = "Birds.jpg"
     oram = UserFileSys.UserFileSys(3, 3, 4096, 10, 1.8, 2.0, 2.2)
     total = 0
-    numTests = 10
+    numTests = 1000
     for i in range(numTests):
         start = time.clock()
         oram.write(fileName)
         oram.read(fileName)
         oram.delete(fileName)
         timeTaken = time.clock() - start
-        print(timeTaken)
+        #print(timeTaken)
         #print(oram._Oram._tree.getSize())
         
         total += timeTaken
@@ -195,5 +196,5 @@ def TestSegSize():
 #TestRepeatRW()
 #TestGeneral()
 #TestBackEv()
-ORAMvsNormal()
+cProfile.run('ORAMvsNormal()')
 #TestSegSize()
