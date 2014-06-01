@@ -31,10 +31,12 @@ def readBucket(bucketID, maxDataLength):
 def writeBucket(bucketID, blocks, maxDataLength):
     if not os.path.exists(home + bucketLoc):
         os.makedirs(home + bucketLoc)
-    outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
+    result = b""
     for block in blocks:
-        writeBlock(outputFile, block, maxDataLength)
-        
+        result += writeBlock(block, maxDataLength)
+    
+    outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
+    outputFile.write(result)
     outputFile.close()
 
 def writeStash(stash, maxDataLength):      # stash is a list of nodes in the stash
@@ -98,11 +100,13 @@ def readDictionary(fileName):
     inputFile.close()
     return result
 
-def writeBlock(outputFile, block, maxDataLength):
-    outputFile.write(block.getLeaf().to_bytes(4, byteorder = "little"))
-    outputFile.write(block.getSegID().to_bytes(4, byteorder = "little"))
+def writeBlock(block, maxDataLength):
+    result = b""
+    result += block.getLeaf().to_bytes(4, byteorder = "little")
+    result += block.getSegID().to_bytes(4, byteorder = "little")
 
     dataLength = len(block.getData())
-    outputFile.write(dataLength.to_bytes(4, byteorder = "little"))
-    outputFile.write(block.getData())
-    outputFile.write(bytes(maxDataLength - dataLength))   # fill up empty space
+    result += dataLength.to_bytes(4, byteorder = "little")
+    result += block.getData()
+    result += bytes(maxDataLength - dataLength)   # fill up empty space
+    return result
