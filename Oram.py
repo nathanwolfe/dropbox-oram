@@ -26,13 +26,15 @@ class Oram:
         
 		# Comment: You may find it helpful to print out stash content when debugging
 		
-    def access(self, action, segID, data):		
+    def access(self, action, segIDList, dataList):		
 		# Comment: also need back ground eviction on a read operation       
 		# TODO: try to get the background eviction rate under different Z and tree size
+        segID = segIDList[0]
+        data = dataList[0]
         while (action == "read" or action == "write") and self._stash.getSize() > self._c:              # background eviction
             if self.debug:
                 print("backEv")
-            self.access("backEv", 0, None)
+            self.access("backEv", [0], [None])
 
         if self.autoResize == True and self._segCounter != 0:
             currentR = (self._tree.getSize() * self._z) / self._segCounter
@@ -40,9 +42,10 @@ class Oram:
                 self.grow(int(((self._targetR - currentR) * self._segCounter) / self._z))
             elif currentR > self._shrinkR:
                 self.shrink(int(((currentR - self._targetR) * self._segCounter) / self._z))
-        
-        if isinstance(data, str):
-            data = data.encode("utf-8")
+
+        for i in range(len(dataList)):
+            if isinstance(dataList[i], str):
+                dataList[i] = dataList[i].encode("utf-8")
         reqResult = self._stash.request(segID)
         if reqResult != "not found":
 			# TODO: maintain some statistics on the hit rate of this optimization		
@@ -56,18 +59,19 @@ class Oram:
                 self._posMap.delete(segID)
                 self._segCounter -= 1
             if self.useVCache == False:
-                self.treeAccess("dummy", segID, data)
-            return reqResult.getData()
+                self.treeAccess("dummy", segIDList, dataList)
+            return [reqResult.getData()] + dataList[1:]
         else:
-            return self.treeAccess(action, segID, data)
+            return self.treeAccess(action, segIDList, dataList)
 
-    def treeAccess(self, action, segID, data):
+    def treeAccess(self, action, segIDList, dataList):
+        segID = segIDList[0]
         leaf = self._posMap.lookup(segID)
         if leaf == -1:
             assert ((action == "write" and segID > 0) or action == "backEv" or action == "dummy"), "tried to " + action + " nonexistent segID"
             leaf = self._tree.randomLeaf()
         transfer = self._tree.readPath(leaf)
-        result = b""
+        result = dataList
         if self.debug:
                 print("\treading from path ", leaf)
         
@@ -76,17 +80,20 @@ class Oram:
                 if self.debug:
                     print("\t\t", block.getLeaf(), block.getSegID(), block.getData())
                 if block.getSegID() != 0:
-                    if block.getSegID() == segID:
-                        result = block.getData()
+                    if block.getSegID() in segIDList:
+                        ind = segIDList.index(block.getSegID())
                         if action == "write":
-                            block.setData(data)
+                            block.setData(dataList[ind])
+                            result[ind] = None
+                        else:
+                            result[ind] = block.getData()
                         if action == "read" or action == "write":
                             block.setLeaf(self._tree.randomLeaf())
-                            self._posMap.insert(segID, block.getLeaf())
+                            self._posMap.insert(segIDList[ind], block.getLeaf())
                         if action != "delete":
                             self._stash.addNode(block)
                         else:
-                            self._posMap.delete(segID)
+                            self._posMap.delete(segIDList[ind])
                             self._segCounter -= 1
                     else:
                         block.setLeaf(self._posMap.lookup(block.getSegID()))
@@ -94,11 +101,12 @@ class Oram:
             if self.debug:
                 print("")
                     
-        if result == b"" and action == "write":
-            newBlock = Block.Block(self._tree.randomLeaf(), segID, data)
+        if result[0] != None and action == "write":
+            newBlock = Block.Block(self._tree.randomLeaf(), segID, dataList[0])
             self._stash.addNode(newBlock)
             self._posMap.insert(segID, newBlock.getLeaf())
             self._segCounter += 1
+            result[0] = None
             if self.debug:
                 print("new block inserted")
                 
@@ -113,13 +121,22 @@ class Oram:
         return result
 
     def read(self, segID):
-        return self.access("read", segID, None)
+        return self.access("read", [segID], [None])[0]
 
     def write(self, segID, data):
-        self.access("write", segID, data)
+        return self.access("write", [segID], [data])
 
     def delete(self, segID):
-        self.access("delete", segID, None)
+        return self.access("delete", [segID], [None])
+
+    def multiRead(self, segIDList):
+        return self.access("read", segIDList, [None] * len(segIDList))
+
+    def multiWrite(self, segIDList, dataList):
+        return self.access("write", segIDList, dataList)
+
+    def multiDelete(self, segIDList):
+        return self.access("delete", segIDList, [None] * len(segIDList))
 
     def grow(self, numLeaves):
         if numLeaves == 0:

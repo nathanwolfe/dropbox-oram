@@ -3,7 +3,7 @@ import DBFileSys
 
 class UserFileSys:
     def __init__(self, treeSize, z, segSize, maxStashSize, growR, targetR, shrinkR):
-        self._Oram = Oram.Oram(treeSize, z, segSize, maxStashSize, growR, targetR, shrinkR)
+        self._oram = Oram.Oram(treeSize, z, segSize, maxStashSize, growR, targetR, shrinkR)
         self._segSizeMap = {}          # holds number of segments in file
         self._segIDMap = {}         # holds segIDs of the file segments
         self._segSize = segSize
@@ -22,7 +22,7 @@ class UserFileSys:
             if self.debug:
                 print ("segName: " + str(userFileName + "_" + str(segNum)))
             self._segIDMap[userFileName + "_" + str(segNum)] = self._curSegID
-            self._Oram.write(self._segIDMap[userFileName + "_" + str(segNum)], dataSeg)
+            self._oram.write(self._segIDMap[userFileName + "_" + str(segNum)], dataSeg)
             self._curSegID += 1
             segNum += 1
 
@@ -36,8 +36,8 @@ class UserFileSys:
             for segNum in range(numSegments):
                 if self.debug:
                     print ("READING FILE " + str(self._segIDMap[userFileName + "_" + str(segNum)]))
-                    print (self._Oram.read(self._segIDMap[userFileName + "_" + str(segNum)]))
-                result += self._Oram.read(self._segIDMap[userFileName + "_" + str(segNum)])
+                    print (self._oram.read(self._segIDMap[userFileName + "_" + str(segNum)]))
+                result += self._oram.read(self._segIDMap[userFileName + "_" + str(segNum)])
             return result
 
         else:
@@ -47,7 +47,7 @@ class UserFileSys:
         if userFileName in self._segSizeMap:
             numSegments = self._segSizeMap[userFileName]
             for segNum in range(numSegments):
-                self._Oram.delete(self._segIDMap[userFileName + "_" + str(segNum)])
+                self._oram.delete(self._segIDMap[userFileName + "_" + str(segNum)])
                 del self._segIDMap[userFileName + "_" + str(segNum)]
         
             del self._segSizeMap[userFileName]
@@ -55,9 +55,32 @@ class UserFileSys:
         else:
             print ("Deleting nonexistent file...")
 
+    def writeList(self, segIDList, dataList):
+        while segIDList != []:
+            dataList = self._oram.multiWrite(segIDList, dataList)
+            segIDList = [segIDList[i] for i in range(len(segIDList)) if dataList[i] is not None]
+            dataList = [x for x in dataList if x is not None]
+
+    def readList(self, segIDList):
+        result = [None] * len(segIDList)
+        while segIDList != []:
+            dataList = self._oram.multiRead(segIDList)
+            counter = 0
+            for i in range(len(result)):
+                if result[i] == None:
+                    result[i] = dataList[counter]
+                    counter += 1
+            segIDList = [segIDList[i] for i in range(len(segIDList)) if result[i] is None]
+        return result
+
+    def deleteList(self, segIDList):
+        while segIDList != []:
+            dataList = self._oram.multiDelete(segIDList)
+            segIDList = [segIDList[i] for i in range(len(segIDList)) if dataList[i] is None]
+            
     def writeEverything(self):
-        DBFileSys.writeStash(self._Oram.getStash().getNodes(), self._segSize)     # I shouldn't access private member variables right?
-        DBFileSys.writeDictionary("posMap", self._Oram.getPosMap().getMap())
+        DBFileSys.writeStash(self._oram.getStash().getNodes(), self._segSize)     # I shouldn't access private member variables right?
+        DBFileSys.writeDictionary("posMap", self._oram.getPosMap().getMap())
         DBFileSys.writeDictionary("segSizeMap", self._segSizeMap)
         DBFileSys.writeDictionary("segIDMap", self._segIDMap)
 
@@ -67,8 +90,8 @@ class UserFileSys:
             self.readEverything()
             print ("New ORAM Created")
         else:
-            self._Oram.setStash(DBFileSys.readStash(self._segSize))
-            self._Oram.setPosMap(DBFileSys.readDictionary("posMap"))
+            self._oram.setStash(DBFileSys.readStash(self._segSize))
+            self._oram.setPosMap(DBFileSys.readDictionary("posMap"))
             self._segSizeMap = DBFileSys.readDictionary("segSizeMap")
             self._segIDMap = DBFileSys.readDictionary("segIDMap")
 
