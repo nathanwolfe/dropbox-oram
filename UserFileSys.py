@@ -9,11 +9,15 @@ class UserFileSys:
         self._segSize = segSize
         self._curSegID = 1
 
+        self.useMultiBlock = True
         self.debug = False
 
     def write(self, userFileName):
         readFile = open(userFileName, "rb")
         segNum = 0
+        if self.useMultiBlock:
+            segIDList = []
+            dataList = []
         while True:
             dataSeg = readFile.read(self._segSize)
             if not dataSeg:
@@ -22,9 +26,15 @@ class UserFileSys:
             if self.debug:
                 print ("segName: " + str(userFileName + "_" + str(segNum)))
             self._segIDMap[userFileName + "_" + str(segNum)] = self._curSegID
-            self._oram.write(self._segIDMap[userFileName + "_" + str(segNum)], dataSeg)
+            if self.useMultiBlock:
+                segIDList.append(self._curSegID)
+                dataList.append(dataSeg)
+            else:
+                self._oram.write(self._segIDMap[userFileName + "_" + str(segNum)], dataSeg)
             self._curSegID += 1
             segNum += 1
+        if self.useMultiBlock:
+            self.writeList(segIDList, dataList)
 
         self._segSizeMap[userFileName] = segNum
         readFile.close()
@@ -32,13 +42,19 @@ class UserFileSys:
     def read(self, userFileName):
         if userFileName in self._segSizeMap:
             numSegments = self._segSizeMap[userFileName]
-            result = b""
-            for segNum in range(numSegments):
-                if self.debug:
-                    print ("READING FILE " + str(self._segIDMap[userFileName + "_" + str(segNum)]))
-                    print (self._oram.read(self._segIDMap[userFileName + "_" + str(segNum)]))
-                result += self._oram.read(self._segIDMap[userFileName + "_" + str(segNum)])
-            return result
+            if self.useMultiBlock:
+                segIDList = []
+                for segNum in range(numSegments):
+                    segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
+                return self.readList(segIDList)
+            else:
+                result = b""
+                for segNum in range(numSegments):
+                    if self.debug:
+                        print ("READING FILE " + str(self._segIDMap[userFileName + "_" + str(segNum)]))
+                        print (self._oram.read(self._segIDMap[userFileName + "_" + str(segNum)]))
+                    result += self._oram.read(self._segIDMap[userFileName + "_" + str(segNum)])
+                return result
 
         else:
             print ("Reading nonexistent file...")
@@ -46,9 +62,16 @@ class UserFileSys:
     def delete(self, userFileName):
         if userFileName in self._segSizeMap:
             numSegments = self._segSizeMap[userFileName]
+            if self.useMultiBlock:
+                segIDList = []
             for segNum in range(numSegments):
-                self._oram.delete(self._segIDMap[userFileName + "_" + str(segNum)])
+                if self.useMultiBlock:
+                    segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
+                else:
+                    self._oram.delete(self._segIDMap[userFileName + "_" + str(segNum)])
                 del self._segIDMap[userFileName + "_" + str(segNum)]
+            if self.useMultiBlock:
+                self.deleteList(segIDList)
         
             del self._segSizeMap[userFileName]
 
@@ -68,10 +91,11 @@ class UserFileSys:
             counter = 0
             for i in range(len(result)):
                 if result[i] == None:
+                    print(len(dataList), counter, i)
                     result[i] = dataList[counter]
                     counter += 1
             segIDList = [segIDList[i] for i in range(len(segIDList)) if result[i] is None]
-        return result
+        return b"".join(result)
 
     def deleteList(self, segIDList):
         while segIDList != []:
