@@ -147,10 +147,10 @@ def ORAMvsNormal():
     from os.path import expanduser
     home = expanduser("~")
 
-    fileName = "Birds.jpg"
+    fileName = "REEC7295_09_TB_chapter53.doc"
     oram = UserFileSys.UserFileSys(3, 3, 4096, 10, 1.8, 2.0, 2.2)
     total = 0
-    numTests = 1000
+    numTests = 100
     for i in range(numTests):
         start = time.clock()
         oram.write(fileName)
