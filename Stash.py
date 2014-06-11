@@ -44,6 +44,10 @@ class Stash:
 
             while curLevel > -1:
                 #print ("another test")
+                # This part of the code can be optimized
+                # You can maintain an array indicating how many blocks have been evicted to each bucket.
+                # Then you do not need to go into each slot.
+                # Tou immediately know whether or not a block can go to a bucket, and if it can, which slot it should go to.
                 for treeNodeIter in range(self._z):
                     #print (treeNodeIter)
                     #print (curLevel)
