@@ -19,12 +19,20 @@ class UserFileSys:
             segIDList = []
             dataList = []
         while True:
+            # Same thing here. Read in the entire file once and then process it.
             dataSeg = readFile.read(self._segSize)
             if not dataSeg:
                 break            # break the loop once end of file is reached
 
             if self.debug:
                 print ("segName: " + str(userFileName + "_" + str(segNum)))
+            
+            # An optimization: map filename to a list of segIDs. I mean filename --> [ID1, ID2, ID3 ...] 
+            # No need for filename1, filename2, ...
+            # Two benefits. First, this saves some space.
+            # Second, you don't need to increment curSegID segNum multiple times. 
+            # You know from the beginning how large the file is and how many chunks you need. 
+            
             self._segIDMap[userFileName + "_" + str(segNum)] = self._curSegID
             if self.useMultiBlock:
                 segIDList.append(self._curSegID)
