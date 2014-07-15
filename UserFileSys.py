@@ -70,7 +70,7 @@ class UserFileSys:
     def delete(self, userFileName):
         if userFileName in self._segSizeMap:
             numSegments = self._segSizeMap[userFileName]
-            setIDList = []
+            segIDList = []
             for segNum in range(numSegments):
                 if len(segIDList) == self.multiBlock:
                     self._oram.multiDelete(segIDList)
