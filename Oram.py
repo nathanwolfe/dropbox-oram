@@ -46,21 +46,27 @@ class Oram:
         for i in range(len(dataList)):
             if isinstance(dataList[i], str):
                 dataList[i] = dataList[i].encode("utf-8")
-        reqResult = self._stash.request(segID)
-        if reqResult != "not found":
-			# TODO: maintain some statistics on the hit rate of this optimization		
-            if self.debug:
-                print("found in stash")
-            if action == "write":
-                reqResult.setData(data)
-            if action != "delete":
-                self._stash.addNode(reqResult)
-            else:
-                self._posMap.delete(segID)
-                self._segCounter -= 1
-            if self.useVCache == False:
-                self.treeAccess("dummy", segIDList, dataList)
-            return [reqResult.getData()] + dataList[1:]
+
+        for i in range(len(dataList)):
+            reqResult = self._stash.request(segIDList[i])
+            if reqResult != "not found":
+                            # TODO: maintain some statistics on the hit rate of this optimization		
+                if self.debug:
+                    print("found in stash")
+                if action == "write":
+                    reqResult.setData(data)
+                if action != "delete":
+                    self._stash.addNode(reqResult)
+                else:
+                    self._posMap.delete(segID)
+                    self._segCounter -= 1
+                if self.useVCache == False:
+                    self.treeAccess("dummy", segIDList, dataList)
+                segIDList[i] = None
+                dataList[i] = reqResult.getData()
+                
+        if all(x is None for x in segIDList):
+            return dataList
         else:
             return self.treeAccess(action, segIDList, dataList)
 
@@ -74,6 +80,7 @@ class Oram:
         result = dataList
         if self.debug:
                 print("\treading from path ", leaf)
+        newLeaf = self._tree.randomLeaf()
         
         for bucket in transfer:
             for block in bucket:
@@ -88,7 +95,7 @@ class Oram:
                         else:
                             result[ind] = block.getData()
                         if action == "read" or action == "write":
-                            block.setLeaf(self._tree.randomLeaf())
+                            block.setLeaf(newLeaf)
                             self._posMap.insert(segIDList[ind], block.getLeaf())
                         if action != "delete":
                             self._stash.addNode(block)
@@ -101,14 +108,15 @@ class Oram:
             if self.debug:
                 print("")
                     
-        if result[0] != None and action == "write":
-            newBlock = Block.Block(self._tree.randomLeaf(), segID, dataList[0])
-            self._stash.addNode(newBlock)
-            self._posMap.insert(segID, newBlock.getLeaf())
-            self._segCounter += 1
-            result[0] = None
-            if self.debug:
-                print("new block inserted")
+        for i in range(len(segIDList)):
+            if result[i] != None and action == "write":
+                newBlock = Block.Block(newLeaf, segIDList[i], dataList[i])
+                self._stash.addNode(newBlock)
+                self._posMap.insert(segIDList[i], newBlock.getLeaf())
+                self._segCounter += 1
+                result[i] = None
+                if self.debug:
+                    print("new block inserted")
                 
         outPath = self._stash.evict(leaf)
         if self.debug:

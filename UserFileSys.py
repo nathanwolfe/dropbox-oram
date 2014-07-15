@@ -9,20 +9,25 @@ class UserFileSys:
         self._segSize = segSize
         self._curSegID = 1
 
-        self.useMultiBlock = True
+        self.multiBlock = 2         # size of multiblock group (1 for no optimization)
         self.debug = False
 
     def write(self, userFileName):
         readFile = open(userFileName, "rb")
         segNum = 0
-        if self.useMultiBlock:
-            segIDList = []
-            dataList = []
+        
+        segIDList = []
+        dataList = []
         while True:
             # Same thing here. Read in the entire file once and then process it.
             dataSeg = readFile.read(self._segSize)
             if not dataSeg:
                 break            # break the loop once end of file is reached
+
+            if len(segIDList) == self.multiBlock:
+                self._oram.multiWrite(segIDList, dataList)
+                segIDList = []
+                dataList = []
 
             if self.debug:
                 print ("segName: " + str(userFileName + "_" + str(segNum)))
@@ -34,15 +39,14 @@ class UserFileSys:
             # You know from the beginning how large the file is and how many chunks you need. 
             
             self._segIDMap[userFileName + "_" + str(segNum)] = self._curSegID
-            if self.useMultiBlock:
-                segIDList.append(self._curSegID)
-                dataList.append(dataSeg)
-            else:
-                self._oram.write(self._segIDMap[userFileName + "_" + str(segNum)], dataSeg)
+            
+            segIDList.append(self._curSegID)
+            dataList.append(dataSeg)
+
             self._curSegID += 1
             segNum += 1
-        if self.useMultiBlock:
-            self.writeList(segIDList, dataList)
+
+        self._oram.multiWrite(segIDList, dataList)
 
         self._segSizeMap[userFileName] = segNum
         readFile.close()
@@ -50,19 +54,14 @@ class UserFileSys:
     def read(self, userFileName):
         if userFileName in self._segSizeMap:
             numSegments = self._segSizeMap[userFileName]
-            if self.useMultiBlock:
-                segIDList = []
-                for segNum in range(numSegments):
-                    segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
-                return self.readList(segIDList)
-            else:
-                result = b""
-                for segNum in range(numSegments):
-                    if self.debug:
-                        print ("READING FILE " + str(self._segIDMap[userFileName + "_" + str(segNum)]))
-                        print (self._oram.read(self._segIDMap[userFileName + "_" + str(segNum)]))
-                    result += self._oram.read(self._segIDMap[userFileName + "_" + str(segNum)])
-                return result
+            segIDList = []
+            result = b""
+            for segNum in range(numSegments):
+                if len(segIDList) == self.multiBlock:
+                    result += b"".join(self._oram.multiRead(segIDList))
+                segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
+            result += b"".join(self._oram.multiRead(segIDList))
+            return result
 
         else:
             print ("Reading nonexistent file...")
@@ -70,45 +69,17 @@ class UserFileSys:
     def delete(self, userFileName):
         if userFileName in self._segSizeMap:
             numSegments = self._segSizeMap[userFileName]
-            if self.useMultiBlock:
-                segIDList = []
+            setIDList = []
             for segNum in range(numSegments):
-                if self.useMultiBlock:
-                    segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
-                else:
-                    self._oram.delete(self._segIDMap[userFileName + "_" + str(segNum)])
+                if len(segIDList) == self.multiBlock:
+                    self._oram.multiDelete(segIDList)
+                segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
                 del self._segIDMap[userFileName + "_" + str(segNum)]
-            if self.useMultiBlock:
-                self.deleteList(segIDList)
-        
+            self._oram.multiDelete(segIDList)
             del self._segSizeMap[userFileName]
 
         else:
             print ("Deleting nonexistent file...")
-
-    def writeList(self, segIDList, dataList):
-        while segIDList != []:
-            dataList = self._oram.multiWrite(segIDList, dataList)
-            segIDList = [segIDList[i] for i in range(len(segIDList)) if dataList[i] is not None]
-            dataList = [x for x in dataList if x is not None]
-
-    def readList(self, segIDList):
-        result = [None] * len(segIDList)
-        while segIDList != []:
-            dataList = self._oram.multiRead(segIDList)
-            counter = 0
-            for i in range(len(result)):
-                if result[i] == None:
-                    print(len(dataList), counter, i)
-                    result[i] = dataList[counter]
-                    counter += 1
-            segIDList = [segIDList[i] for i in range(len(segIDList)) if result[i] is None]
-        return b"".join(result)
-
-    def deleteList(self, segIDList):
-        while segIDList != []:
-            dataList = self._oram.multiDelete(segIDList)
-            segIDList = [segIDList[i] for i in range(len(segIDList)) if dataList[i] is None]
             
     def writeEverything(self):
         DBFileSys.writeStash(self._oram.getStash().getNodes(), self._segSize)     # I shouldn't access private member variables right?
