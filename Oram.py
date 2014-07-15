@@ -71,7 +71,7 @@ class Oram:
             return self.treeAccess(action, segIDList, dataList)
 
     def treeAccess(self, action, segIDList, dataList):
-        segID = segIDList[0]
+        segID = next(x for x in segIDList if x is not None)
         leaf = self._posMap.lookup(segID)
         if leaf == -1:
             assert ((action == "write" and segID > 0) or action == "backEv" or action == "dummy"), "tried to " + action + " nonexistent segID"

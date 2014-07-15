@@ -59,6 +59,7 @@ class UserFileSys:
             for segNum in range(numSegments):
                 if len(segIDList) == self.multiBlock:
                     result += b"".join(self._oram.multiRead(segIDList))
+                    segIDList = []
                 segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
             result += b"".join(self._oram.multiRead(segIDList))
             return result
@@ -73,6 +74,7 @@ class UserFileSys:
             for segNum in range(numSegments):
                 if len(segIDList) == self.multiBlock:
                     self._oram.multiDelete(segIDList)
+                    segIDList = []
                 segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
                 del self._segIDMap[userFileName + "_" + str(segNum)]
             self._oram.multiDelete(segIDList)
