@@ -45,7 +45,7 @@ def TestGeneral() :
     #random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
 					# Comment: When you fixed this bug, remove the previous line so you can test with random input again.
 	
-    oramsize = 1
+    oramsize = 101
     #minoramsize = 7
     z = 3
     maxStashSize = 3
@@ -194,8 +194,8 @@ def TestSegSize():
     
 #TestBasic()
 #TestRepeatRW()
-#TestGeneral()
+TestGeneral()
 #TestBackEv()
-cProfile.run('ORAMvsNormal()')
+#cProfile.run('ORAMvsNormal()')
 #ORAMvsNormal()
 #TestSegSize()
