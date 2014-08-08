@@ -147,10 +147,17 @@ def ORAMvsNormal():
     from os.path import expanduser
     home = expanduser("~")
 
+<<<<<<< HEAD
     fileName = "REEC7295_09_TB_chapter53.doc"
     oram = UserFileSys.UserFileSys(3, 3, 4096, 10, 1.8, 2.0, 2.2)
     total = 0
     numTests = 100
+=======
+    fileName = "M2U00725.MPG"
+    oram = UserFileSys.UserFileSys(3, 3, 4096, 10, 1.8, 2.0, 2.2)
+    total = 0
+    numTests = 10
+>>>>>>> bc1f66f3963025bb594d094651d85475fc451fbb
     for i in range(numTests):
         start = time.clock()
         oram.write(fileName)
@@ -197,4 +204,5 @@ def TestSegSize():
 #TestGeneral()
 #TestBackEv()
 cProfile.run('ORAMvsNormal()')
+#ORAMvsNormal()
 #TestSegSize()

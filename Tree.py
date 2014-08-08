@@ -10,7 +10,7 @@ import DBFileSys
 
 class Tree:
     def __init__(self, nodeNumber, z, segmentSize):
-        self.useRAM = True
+        self.useRAM = False
             
         if self.useRAM:
             self._buckets = [0] * nodeNumber
