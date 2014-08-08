@@ -45,7 +45,7 @@ def TestGeneral() :
     #random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
 					# Comment: When you fixed this bug, remove the previous line so you can test with random input again.
 	
-    oramsize = 1
+    oramsize = 101
     #minoramsize = 7
     z = 3
     maxStashSize = 3
@@ -147,17 +147,10 @@ def ORAMvsNormal():
     from os.path import expanduser
     home = expanduser("~")
 
-<<<<<<< HEAD
-    fileName = "REEC7295_09_TB_chapter53.doc"
     oram = UserFileSys.UserFileSys(3, 3, 4096, 10, 1.8, 2.0, 2.2)
     total = 0
     numTests = 100
-=======
-    fileName = "M2U00725.MPG"
-    oram = UserFileSys.UserFileSys(3, 3, 4096, 10, 1.8, 2.0, 2.2)
-    total = 0
-    numTests = 10
->>>>>>> bc1f66f3963025bb594d094651d85475fc451fbb
+    fileName = "Birds.jpg"
     for i in range(numTests):
         start = time.clock()
         oram.write(fileName)
@@ -197,12 +190,30 @@ def TestSegSize():
         avg = total / numTests
         print(str(segSize) + " " + str(avg))
         segSize *= 2
+
+def TestMultiBlock():
+    fileName = "Zou- Mathematics Solutions.pdf"
+    numTrials = 1000
+    numTests = 5
+    for i in range(2, numTests+1):
+        total = 0
+        oram = UserFileSys.UserFileSys(101, 3, 4096, 10, 1.8, 2.0, 2.2, i)
+        for j in range(numTrials):
+            start = time.clock()
+            oram.write(fileName)
+            oram.read(fileName)
+            oram.delete(fileName)
+            timeTaken = time.clock() - start
+            total+=timeTaken
+        avg = total / numTrials
+        print(str(i) + ": " + str(avg))  
         
     
 #TestBasic()
 #TestRepeatRW()
 #TestGeneral()
 #TestBackEv()
-cProfile.run('ORAMvsNormal()')
+#cProfile.run('ORAMvsNormal()')
 #ORAMvsNormal()
 #TestSegSize()
+TestMultiBlock()        

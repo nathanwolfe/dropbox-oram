@@ -15,6 +15,12 @@ def readBucket(bucketID, maxDataLength):
         os.makedirs(home + bucketLoc)
     inputFile = open(home + bucketLoc + str(bucketID), "rb")         # rb = read binary
     result = []
+    
+    # Same rule for disc appies here.
+    # Reading everthing in together should be faster than reading several times.
+    # Try to read the entire bucket file once and then parse it into whatever format you need.
+    # We should be able to do so because we know exactly how large each bucket is. 
+    
     while True:
         leafBytes = inputFile.read(4)
         if leafBytes == b"":
@@ -40,10 +46,15 @@ def writeBucket(bucketID, blocks, maxDataLength):
     outputFile.close()
 
 def writeStash(stash, maxDataLength):      # stash is a list of nodes in the stash
-    outputFile = open(home + "/Dropbox/stash", "wb")
-    for block in stash:
-        writeBlock(outputFile, block, maxDataLength)
+    if not os.path.exists(home + "/Dropbox/stash"):
+        os.makedirs(home + "/Dropbox/stash")
 
+    result = b""
+    for block in stash:
+        result += writeBlock(block, maxDataLength)
+
+    outputFile = open(home + "/Dropbox/stash", "wb")
+    outputFile.write(result)
     outputFile.close()
 
 def readStash(maxDataLength):         # returns a list where each element is a block in the stash
@@ -51,6 +62,9 @@ def readStash(maxDataLength):         # returns a list where each element is a b
         return "new ORAM"
     inputFile = open(home + "/Dropbox/stash", "rb")
     result = []
+    
+    # Same problem as in readBucket(). Try to read it less times.
+    
     while True:
         #print ("loop")
         leafBytes = inputFile.read(4)
