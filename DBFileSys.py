@@ -46,10 +46,15 @@ def writeBucket(bucketID, blocks, maxDataLength):
     outputFile.close()
 
 def writeStash(stash, maxDataLength):      # stash is a list of nodes in the stash
-    outputFile = open(home + "/Dropbox/stash", "wb")
-    for block in stash:
-        writeBlock(outputFile, block, maxDataLength)
+    if not os.path.exists(home + "/Dropbox/stash"):
+        os.makedirs(home + "/Dropbox/stash")
 
+    result = b""
+    for block in stash:
+        result += writeBlock(block, maxDataLength)
+
+    outputFile = open(home + "/Dropbox/stash", "wb")
+    outputFile.write(result)
     outputFile.close()
 
 def readStash(maxDataLength):         # returns a list where each element is a block in the stash

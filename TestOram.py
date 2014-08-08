@@ -147,7 +147,7 @@ def ORAMvsNormal():
     from os.path import expanduser
     home = expanduser("~")
 
-    fileName = "M2U00725.MPG"
+    fileName = "Birds.jpg"
     oram = UserFileSys.UserFileSys(3, 3, 4096, 10, 1.8, 2.0, 2.2)
     total = 0
     numTests = 10
@@ -190,12 +190,30 @@ def TestSegSize():
         avg = total / numTests
         print(str(segSize) + " " + str(avg))
         segSize *= 2
+
+def TestMultiBlock():
+    fileName = "Zou- Mathematics Solutions.pdf"
+    numTrials = 1000
+    numTests = 5
+    for i in range(2, numTests+1):
+        total = 0
+        oram = UserFileSys.UserFileSys(101, 3, 4096, 10, 1.8, 2.0, 2.2, i)
+        for j in range(numTrials):
+            start = time.clock()
+            oram.write(fileName)
+            oram.read(fileName)
+            oram.delete(fileName)
+            timeTaken = time.clock() - start
+            total+=timeTaken
+        avg = total / numTrials
+        print(str(i) + ": " + str(avg))  
         
     
 #TestBasic()
 #TestRepeatRW()
-TestGeneral()
+#TestGeneral()
 #TestBackEv()
 #cProfile.run('ORAMvsNormal()')
 #ORAMvsNormal()
 #TestSegSize()
+TestMultiBlock()        

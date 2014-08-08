@@ -5,7 +5,7 @@ import math
 class Stash:
 
     def __init__(self, z):
-        self._oldStash = False
+        self._oldStash = True
         self._nodes = []
         self._z = z
         
