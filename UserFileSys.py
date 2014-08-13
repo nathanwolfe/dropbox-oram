@@ -61,7 +61,8 @@ class UserFileSys:
                     result += b"".join(self._oram.multiRead(segIDList))
                     segIDList = []
                 segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
-            result += b"".join(self._oram.multiRead(segIDList))
+            if segIDList != []:
+                result += b"".join(self._oram.multiRead(segIDList))
             return result
 
         else:
