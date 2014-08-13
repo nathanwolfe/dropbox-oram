@@ -19,7 +19,7 @@ def getMaxLevel(leaf1, leaf2):
         leaf2 = leaf2 >> 1
 
     # now leaf1 and leaf2 are on the same level
-<<<<<<< HEAD
+    """<<<<<<< HEAD
 
     revBin(leaf1)
     revBin(leaf2)
@@ -30,8 +30,7 @@ def getMaxLevel(leaf1, leaf2):
     
     return int(math.log(t3, 2))
     
-    """xdiff = 0
-=======
+    """
     #print ("test1 " + str(leaf1))
     #print("test " + str(leaf2))
 

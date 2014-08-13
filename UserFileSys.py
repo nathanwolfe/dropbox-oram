@@ -2,14 +2,14 @@ import Oram
 import DBFileSys
 
 class UserFileSys:
-    def __init__(self, treeSize, z, segSize, maxStashSize, growR, targetR, shrinkR):
+    def __init__(self, treeSize, z, segSize, maxStashSize, growR, targetR, shrinkR, multiBlock):
         self._oram = Oram.Oram(treeSize, z, segSize, maxStashSize, growR, targetR, shrinkR)
         self._segSizeMap = {}          # holds number of segments in file
         self._segIDMap = {}         # holds segIDs of the file segments
         self._segSize = segSize
         self._curSegID = 1
 
-        self.multiBlock = 2         # size of multiblock group (1 for no optimization)
+        self.multiBlock = multiBlock         # size of multiblock group (1 for no optimization)
         self.debug = False
 
     def write(self, userFileName):
