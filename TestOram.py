@@ -206,7 +206,16 @@ def TestMultiBlock():
             timeTaken = time.clock() - start
             total+=timeTaken
         avg = total / numTrials
-        print(str(i) + ": " + str(avg))  
+        print(str(i) + ": " + str(avg))
+
+def TestBlockPack():
+    numTests = 20
+    oram = UserFileSys.UserFileSys(101, 2, 2048, 10, 1.8, 2.0, 2.2, 1)
+    for i in range(2, 10):
+        oram.write("Birds - Copy (" + str(i) + ").jpg")
+        oram.read("Birds - Copy (" + str(i) + ").jpg")
+    print(oram._oram._tree.getSize())
+    print(oram._oram._stash.getSize())
         
     
 #TestBasic()
@@ -216,4 +225,5 @@ def TestMultiBlock():
 #cProfile.run('ORAMvsNormal()')
 #ORAMvsNormal()
 #TestSegSize()
-TestMultiBlock()        
+#TestMultiBlock()
+TestBlockPack()
