@@ -192,7 +192,7 @@ def TestSegSize():
         segSize *= 2
 
 def TestMultiBlock():
-    fileName = "Zou- Mathematics Solutions.pdf"
+    fileName = "2014_Science_Fair.jpg"
     numTrials = 1000
     numTests = 5
     for i in range(2, numTests+1):
@@ -209,11 +209,13 @@ def TestMultiBlock():
         print(str(i) + ": " + str(avg))
 
 def TestBlockPack():
-    numTests = 20
-    oram = UserFileSys.UserFileSys(101, 2, 2048, 10, 1.8, 2.0, 2.2, 1)
-    for i in range(2, 10):
-        oram.write("Birds - Copy (" + str(i) + ").jpg")
-        oram.read("Birds - Copy (" + str(i) + ").jpg")
+    #random.seed(5)
+    numTests = 10
+    oram = UserFileSys.UserFileSys(101, 2, 80000, 10, 1.8, 2.0, 2.2, 1)
+    oram.blockPack = True
+    for i in range(2, numTests):
+        oram.write("2014_Science_Fair - Copy (" + str(i) + ").jpg")
+        oram.read("2014_Science_Fair - Copy (" + str(i) + ").jpg")
     print(oram._oram._tree.getSize())
     print(oram._oram._stash.getSize())
         
