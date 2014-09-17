@@ -61,18 +61,18 @@ class UserFileSys:
             segIDList = []
             dataList = []
             curPosition = 0
-            packed = False
             
             for segNum in range(numSeg):
+                packed = False
                 dataSeg = allData[curPosition:curPosition+self._segSize]
 
                 if segNum == numSeg-1:       # we are at the last segment
                     print(self._blockSpaceLeft)
                     for key, spaceLeft in self._blockSpaceLeft.items():
-                        print("test")
                         if len(dataSeg) <= spaceLeft:
-                            print("entered")
+                            #print("entered")
                             lastSegID = key
+                            print("packed segID: " + str(lastSegID))
                             b"".join([dataSeg,self._oram.read(lastSegID)])   # **** not sure about this ****
                             self._segIDMap[userFileName + "_" + str(segNum)] = lastSegID
                             #print (userFileName + "_" + str(segNum))
@@ -82,13 +82,13 @@ class UserFileSys:
 
                             start = self._segSize - self._blockSpaceLeft[lastSegID] + 1
                             self._startEnd[lastSegID] = [start, start + len(dataSeg)] # do something about start and end offsets
-
+                            
                             self._blockSpaceLeft[lastSegID] -= len(dataSeg)
                             packed = True
                             break
 
                     if packed == False:
-                        print(self._curSegID)
+                        #print("unpacked segID: " + str(self._curSegID))
                         # if there are no available ones, we map it to a new segID
                         self._segIDMap[userFileName + "_" + str(segNum)] = self._curSegID
                         #print(userFileName + "_" + str(segNum))
@@ -103,19 +103,16 @@ class UserFileSys:
                             #start and end offsets
                             
                 else:                 # write the block normally
+                    self._segIDMap[userFileName + "_" + str(segNum)] = self._curSegID
+                    segIDList.append(self._curSegID)
+                    dataList.append(dataSeg)
+                    self._curSegID += 1
+                    curPosition += self._segSize
                     if len(segIDList) == self.multiBlock:
+                        print("test")
                         self._oram.multiWrite(segIDList, dataList)
                         segIDList = []
                         dataList = []
-
-                    self._segIDMap[userFileName + "_" + str(segNum)] = self._curSegID
-                    #print(userFileName + "_" +str(segNum))
-
-                    segIDList.append(self._curSegID)
-                    dataList.append(dataSeg)
-
-                    self._curSegID += 1
-                    curPosition += self._segSize
 
             if segIDList != []:
                 self._oram.multiWrite(segIDList, dataList)

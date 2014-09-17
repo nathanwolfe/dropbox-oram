@@ -18,7 +18,7 @@ class Oram:
 
         self._segCounter = 0
 
-        self.autoResize = True
+        self.autoResize = False
         self.showResize = False
 
         self.useVCache = True
@@ -54,7 +54,7 @@ class Oram:
                             # TODO: maintain some statistics on the hit rate of this optimization
                 reqResult.setLeaf(newLeaf)
                 self._posMap.insert(segIDList[i], newLeaf)
-                if True:
+                if self.debug == True:
                     print("found in stash")
                 if action == "write":
                     reqResult.setData(dataList[i])
@@ -122,14 +122,8 @@ class Oram:
                 self._posMap.insert(segIDList[i], newLeaf)
                 self._segCounter += 1
                 result[i] = None
-                #if self.debug:
-                print("new block inserted")
-
-        for i in range(len(segIDList)):
-            if segIDList[i] != None:
-                print(self._posMap.lookup(segIDList[i]))
-
-        print("")
+                if self.debug:
+                    print("new block inserted")
                 
         outPath = self._stash.evict(leaf)
         if self.debug:
