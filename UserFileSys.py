@@ -108,14 +108,14 @@ class UserFileSys:
                     dataList.append(dataSeg)
                     self._curSegID += 1
                     curPosition += self._segSize
-
                     if len(segIDList) == self.multiBlock:
                         #print("test")
                         self._oram.multiWrite(segIDList, dataList)
                         segIDList = []
                         dataList = []
 
-            self._oram.multiWrite(segIDList, dataList)
+            if segIDList != []:
+                self._oram.multiWrite(segIDList, dataList)
 
             self._segSizeMap[userFileName] = numSeg
 
@@ -130,7 +130,11 @@ class UserFileSys:
                 result = b""
                 for segNum in range(numSegments):
                     if len(segIDList) == self.multiBlock:
-                        result += b"".join(self._oram.multiRead(segIDList))
+                        fetch = self._oram.multiRead(segIDList)
+                        if None not in fetch:
+                            result += b"".join(fetch)
+                        else:
+                            print("fail", fetch.index(None))
                         segIDList = []
                     segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
                 result += b"".join(self._oram.multiRead(segIDList))
@@ -178,7 +182,8 @@ class UserFileSys:
                     segIDList = []
                 segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
                 del self._segIDMap[userFileName + "_" + str(segNum)]
-            self._oram.multiDelete(segIDList)
+            if segIDList != []:
+                self._oram.multiDelete(segIDList)
             del self._segSizeMap[userFileName]
 
         else:

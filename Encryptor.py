@@ -3,9 +3,6 @@ from random import randint
 import base64
 import os
 
-EncodeAES = lambda c, s: base64.b64encode(c.encrypt(pad(s)))
-DecodeAES = lambda c, e: c.decrypt(base64.b64decode(e)).rstrip(PADDING)
-
 def mask(key, maskNum):
     cipher = AES.new(key, AES.MODE_ECB)
     return cipher.encrypt(maskNum)
