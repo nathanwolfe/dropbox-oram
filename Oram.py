@@ -22,11 +22,13 @@ class Oram:
         self.showResize = False
 
         self.useVCache = True
-        self.debug = False			
-        
+        self.debug = False
+        self.VCacheCounter = 0
+        self.totalCounter= 0
 		# Comment: You may find it helpful to print out stash content when debugging
 		
-    def access(self, action, segIDList, dataList):		
+    def access(self, action, segIDList, dataList):
+        self.totalCounter += 1
 		# Comment: also need back ground eviction on a read operation       
 		# TODO: try to get the background eviction rate under different Z and tree size
         segID = segIDList[0]
@@ -50,7 +52,7 @@ class Oram:
         for i in range(len(dataList)):
             reqResult = self._stash.request(segIDList[i])
             if reqResult != "not found":
-                            # TODO: maintain some statistics on the hit rate of this optimization		
+                self.VCacheCounter += 1
                 if self.debug:
                     print("found in stash")
                 if action == "write":

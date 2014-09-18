@@ -67,12 +67,12 @@ class UserFileSys:
                 dataSeg = allData[curPosition:curPosition+self._segSize]
 
                 if segNum == numSeg-1:       # we are at the last segment
-                    print(self._blockSpaceLeft)
+                    #print(self._blockSpaceLeft)
                     for key, spaceLeft in self._blockSpaceLeft.items():
                         if len(dataSeg) <= spaceLeft:
                             #print("entered")
                             lastSegID = key
-                            print("packed segID: " + str(lastSegID))
+                            #print("packed segID: " + str(lastSegID))
                             b"".join([dataSeg,self._oram.read(lastSegID)])   # **** not sure about this ****
                             self._segIDMap[userFileName + "_" + str(segNum)] = lastSegID
                             #print (userFileName + "_" + str(segNum))
@@ -110,7 +110,7 @@ class UserFileSys:
                     curPosition += self._segSize
 
                     if len(segIDList) == self.multiBlock:
-                        print("test")
+                        #print("test")
                         self._oram.multiWrite(segIDList, dataList)
                         segIDList = []
                         dataList = []
