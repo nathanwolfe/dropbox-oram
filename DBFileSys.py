@@ -49,7 +49,7 @@ def writeBucket(bucketID, blocks, maxDataLength):
         result += writeBlock(block, maxDataLength)
     
     if encrypt:
-        Encryptor.write(home + bucketLoc + str(bucketID), key)
+        Encryptor.write(home + bucketLoc + str(bucketID), result, key)
     else:
         outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
         outputFile.write(result)
