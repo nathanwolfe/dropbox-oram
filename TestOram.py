@@ -147,15 +147,15 @@ def ORAMvsNormal():
     from os.path import expanduser
     home = expanduser("~")
 
-    oram = UserFileSys.UserFileSys(1300, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+    oram = UserFileSys.UserFileSys(1301, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram._oram.autoResize = False
     multFact = 1
     for i in range (0,11):
         oram.write("test" + str(4*multFact) + ".txt")
         multFact*=2
         
-    """total = 0
-    numTests = 1000
+    total = 0
+    numTests = 5000
     for i in range(numTests):
         fileName = getFile()
         start = time.clock()
@@ -179,7 +179,7 @@ def ORAMvsNormal():
         file.write(data)
         total += (time.clock()-start)
     avg = total/numTests
-    print ("Total Time without ORAM: " + str(total))"""
+    print ("Total Time without ORAM: " + str(total))
 
     
 def TestSegSize():    # optimal = 64kB
@@ -251,16 +251,17 @@ def TestBlockPack(testFile):
 def TestGrowShrink(version):
     if version == "utilization":
         numTests = 1000
+        
+        for j in range(numTests):
+            shutil.copyfile("test32.txt", "test32_" + str(j) + ".txt")
+            
         for i in range(3):
             if i==0:   # 0.45 - 0.55
-                oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+                oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
             elif i==1:  #0.42 - 0.58
-                oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.72, 2.0, 2.38, 1)
+                oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.72, 2.0, 2.38, 1)
             elif i==2:  #0.48 - 0.52
-                oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.92, 2.0, 2.08, 1)
-
-            for j in range(numTests):
-                shutil.copyfile("test32.txt", "test32_" + str(j) + ".txt")
+                oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.92, 2.0, 2.08, 1)
 
             start = time.clock()
             for j in range(numTests):
@@ -270,20 +271,20 @@ def TestGrowShrink(version):
             print(str(i) + " " + str(timeTaken))
 
     if version == "overhead":
-        numTests = 780
+        numTests = 2000
         for i in range(numTests):
             shutil.copyfile("test64.txt", "test64_" + str(i) + ".txt")
 
-        oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+        oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
         start = time.clock()
         for i in range(numTests):
             oram.write("test64_" + str(i) + ".txt")
         timeTaken = time.clock() - start
-        avgGrowthTime = oram._oram.tree.totalTimeGrowth / oram._oram.tree.numGrowth
+        avgGrowthTime = oram._oram._tree.totalTimeGrowth / oram._oram._tree.numGrowth
         print("Avg growth time: " + str(avgGrowthTime))
         print("Auto Resize ON: " + str(timeTaken))
 
-        oram = UserFileSys.UserFileSys(531, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+        oram = UserFileSys.UserFileSys(1501, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
         oram._oram.autoResize = False
         start = time.clock()
         for i in range(numTests):
@@ -334,8 +335,8 @@ def TestVCache():
 #TestGeneral()
 #TestBackEv()
 #cProfile.run('ORAMvsNormal()')
-#ORAMvsNormal()
+ORAMvsNormal()
 #TestSegSize()
 #TestMultiBlock()
 #TestBlockPack()
-TestGrowShrink("utilization")
+#TestGrowShrink("overhead")
