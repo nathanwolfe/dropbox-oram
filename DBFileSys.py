@@ -1,5 +1,6 @@
 import os
 import Block
+import Encryptor
 
 from os.path import expanduser
 home = expanduser("~")
@@ -10,28 +11,34 @@ useSync = False
 if useSync == False:
     bucketLoc = "/Documents/buckets/"
 
+encrypt = True
+key = "16characterslong"
+
 def readBucket(bucketID, maxDataLength):
     if not os.path.exists(home + bucketLoc):
         os.makedirs(home + bucketLoc)
-    inputFile = open(home + bucketLoc + str(bucketID), "rb")         # rb = read binary
+
+    if encrypt:
+        bytesIn = Encryptor.read(home + bucketLoc + str(bucketID), key)
+    else:
+        inputFile = open(home + bucketLoc + str(bucketID), "rb")         # rb = read binary
+        bytesIn = inputFile.read()
+        inputFile.close()
     result = []
     
-    # Same rule for disc appies here.
-    # Reading everthing in together should be faster than reading several times.
-    # Try to read the entire bucket file once and then parse it into whatever format you need.
-    # We should be able to do so because we know exactly how large each bucket is. 
-    
     while True:
-        leafBytes = inputFile.read(4)
+        leafBytes = bytesIn[:4]
+        bytesIn = bytesIn[4:]
         if leafBytes == b"":
             break                                             # break if end of file
-        segIDBytes = inputFile.read(4)
-        dataLength = int.from_bytes(inputFile.read(4), byteorder = "little")
-        data = inputFile.read(dataLength)
-        inputFile.read(maxDataLength - dataLength)
+        segIDBytes = bytesIn[:4]
+        bytesIn = bytesIn[4:]
+        dataLength = int.from_bytes(bytesIn[:4], byteorder = "little")
+        bytesIn = bytesIn[4:]
+        data = bytesIn[:dataLength]
+        bytesIn = bytesIn[maxDataLength:]
         result.append(Block.Block(int.from_bytes(leafBytes, byteorder = "little"), int.from_bytes(segIDBytes, byteorder = "little"), data))
 
-    inputFile.close()
     return result
 
 def writeBucket(bucketID, blocks, maxDataLength):
@@ -41,9 +48,12 @@ def writeBucket(bucketID, blocks, maxDataLength):
     for block in blocks:
         result += writeBlock(block, maxDataLength)
     
-    outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
-    outputFile.write(result)
-    outputFile.close()
+    if encrypt:
+        Encryptor.write(home + bucketLoc + str(bucketID), key)
+    else:
+        outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
+        outputFile.write(result)
+        outputFile.close()
 
 def writeStash(stash, maxDataLength):      # stash is a list of nodes in the stash
     if not os.path.exists(home + "/Dropbox/stash"):
