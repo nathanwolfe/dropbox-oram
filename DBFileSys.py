@@ -7,7 +7,7 @@ home = expanduser("~")
 #print (home)
 
 bucketLoc = "/Dropbox/buckets/"
-useSync = False
+useSync = True
 if useSync == False:
     bucketLoc = "/Documents/buckets/"
     
