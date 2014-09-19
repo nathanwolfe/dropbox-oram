@@ -5,6 +5,7 @@ import time
 import os
 import shutil
 import cProfile
+import Encryptor
 
 def TestBasic() :
     oramsize = 1 << 4 - 1
@@ -150,6 +151,7 @@ def createTestFile(size):
 def ORAMvsNormal():
     from os.path import expanduser
     home = expanduser("~")
+<<<<<<< HEAD
 		
     oram = UserFileSys.UserFileSys(1301, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram._oram.autoResize = False
@@ -157,10 +159,22 @@ def ORAMvsNormal():
     for i in range (2,13):
         createTestFile(1 << i)		
         oram.write("TestFiles/test" + str(1 << i) + ".txt")
+=======
+    print("asd")
+    oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+    print("hi")
+    """oram._oram.autoResize = True
+    multFact = 1
+    for i in range (0,11):
+        print("test")
+        oram.write("test" + str(4*multFact) + ".txt")
+        multFact*=2
+>>>>>>> cf9095656e36309d2db6dec55c7493a80dd9cd50
         
     total = 0
     numTests = 500
     for i in range(numTests):
+        print ("tests")
         fileName = getFile()
         start = time.clock()
         oram.read(fileName)
@@ -169,9 +183,20 @@ def ORAMvsNormal():
         #print(oram._Oram._tree.getSize())
         
         total += timeTaken
+    print ("Total Time with ORAM (encryption): " + str(total))
 
-    print ("Total Time with ORAM: " + str(total))
+    total = 0
+    for i in range(numTests):
+        fileName = getFile()
+        data = file.read()
+        start = time.clock()
+        Encryptor.write(home + "/Dropbox/testEncrypt", data, "16characterslong")
+        Encryptor.read(home + "/Dropbox/testEncrypt", "16characterslong")
+        timeTaken = time.clock() - start
+        total += timeTaken
+    print("Total Time without ORAM (encryption): " + str(total))
 
+        
     total = 0
     for i in range(numTests):
         start = time.clock()
@@ -184,7 +209,7 @@ def ORAMvsNormal():
         file.close()		
         total += (time.clock()-start)
     avg = total/numTests
-    print ("Total Time without ORAM: " + str(total))
+    print ("Total Time without ORAM (no encryption): " + str(total))"""
 
     
 def TestSegSize():    # optimal = 64kB
