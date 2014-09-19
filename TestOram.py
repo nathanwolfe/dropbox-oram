@@ -7,6 +7,10 @@ import shutil
 import cProfile
 import Encryptor
 
+from os.path import expanduser
+home = expanduser("~")
+
+
 def TestBasic() :
     oramsize = 1 << 4 - 1
     oram = Oram.Oram(oramsize, 4, 100)
@@ -143,27 +147,26 @@ def TestBackEv():
         print ("\tMax Stash Size = " + str(maxStashSize) + ": dummy- " + str(numBackEv) + ", actual- " + str(2*oramsize + numKeys))
         print ("\t\tRatio = " + str(numBackEv / (2*oramsize + numKeys)))
 
+def createTestFile(size):
+    file = open("TestFiles/test" + str(size) + ".txt", "w")
+    file.write('0' * size)
+    file.close()			
+		
 def ORAMvsNormal():
-    from os.path import expanduser
-    home = expanduser("~")
     oram = UserFileSys.UserFileSys(1301, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram._oram.autoResize = False
-    multFact = 1
-    for i in range (0,11):
-        #print("hi")
-        oram.write("test" + str(4*multFact) + ".txt")
-        multFact*=2
+	
+    for i in range (2,13):
+        createTestFile(1 << i)		
+        oram.write("TestFiles/test" + str(1 << i) + ".txt")
         
     total = 0
     numTests = 1000
     for i in range(numTests):
-        #print("test")
         fileName = getFile()
         start = time.clock()
         oram.read(fileName)
         timeTaken = time.clock() - start
-        #print(timeTaken)
-        #print(oram._Oram._tree.getSize())
         
         total += timeTaken
     print ("Total Time with ORAM (encryption): " + str(total))
@@ -189,6 +192,7 @@ def ORAMvsNormal():
         file.close()
         file = open(fileName, "w")
         file.write(data)
+        file.close()		
         total += (time.clock()-start)
     avg = total/numTests
     print ("Total Time without ORAM (no encryption): " + str(total))
@@ -308,28 +312,10 @@ def TestGrowShrink(version):
     
 def getFile():     # returns name of file based on distribution graph
     prob = random.random()
-    if prob < 0.5:
-        return ("test4.txt")
-    elif prob < 0.6:
-        return ("test8.txt")
-    elif prob < 0.8:
-        return ("test16.txt")
-    elif prob < 0.9:
-        return ("test32.txt")
-    elif prob < 0.92:
-        return ("test64.txt")
-    elif prob < 0.95:
-        return ("test128.txt")
-    elif prob < 0.97:
-        return ("test256.txt")
-    elif prob < 0.98:
-        return ("test512.txt")
-    elif prob < 0.99:
-        return ("test1024.txt")
-    elif prob < 0.995:
-        return ("test2048.txt")
-    else:
-        return ("test4096.txt")
+    probTable = [0.0, 0.5, 0.6, 0.8, 0.9, 0.92, 0.95, 0.97, 0.98, 0.99, 0.995, 1.0]
+    for i in range(len(probTable)-1):
+        if prob	>= probTable[i] and prob < probTable[i+1]:
+            return ("TestFiles/test" + str(4 << i) + ".txt")
 
 def TestVCache():
     oram = UserFileSys.UserFileSys(101, 3, 4096, 100, 1.8, 2.0, 2.2, 1)
@@ -340,14 +326,14 @@ def TestVCache():
 
     print(oram._oram.VCacheCounter)
     print(oram._oram.totalCounter)
-    
-     
+ 
 #TestBasic()
 #TestRepeatRW()
 #TestGeneral()
+#cProfile.run('TestGeneral()')
 #TestBackEv()
-cProfile.run('ORAMvsNormal()')
-#ORAMvsNormal()
+#cProfile.run('ORAMvsNormal()')
+ORAMvsNormal()
 #TestSegSize()
 #TestMultiBlock()
 #TestBlockPack()

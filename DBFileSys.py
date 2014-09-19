@@ -1,4 +1,5 @@
 import os
+import pickle as pickle
 import Block
 import Encryptor
 
@@ -10,9 +11,8 @@ bucketLoc = "/Dropbox/buckets/"
 useSync = True
 if useSync == False:
     bucketLoc = "/Documents/buckets/"
-    
-#bucketLoc = "./buckets/"
-
+bucketLoc = "./buckets/"
+	
 encrypt = True
 key = "16characterslong"
 
@@ -20,14 +20,14 @@ def readBucket(bucketID, maxDataLength):
     if not os.path.exists(home + bucketLoc):
         os.makedirs(home + bucketLoc)
 
+    inputFile = open(home + bucketLoc + str(bucketID), "rb")         # rb = read binary
+    #bytesIn = inputFile.read()
+    bytesIn = pickle.load(inputFile)		
+    inputFile.close()
     if encrypt:
-        bytesIn = Encryptor.read(home + bucketLoc + str(bucketID), key)
-    else:
-        inputFile = open(home + bucketLoc + str(bucketID), "rb")         # rb = read binary
-        bytesIn = inputFile.read()
-        inputFile.close()
-    result = []
+        bytesIn = Encryptor.decrypt(bytesIn, key)
 
+    result = []
     while True:
         leafBytes = bytesIn[:4]
         bytesIn = bytesIn[4:]
@@ -51,11 +51,12 @@ def writeBucket(bucketID, blocks, maxDataLength):
         result += writeBlock(block, maxDataLength)
     
     if encrypt:
-        Encryptor.write(home + bucketLoc + str(bucketID), result, key)
-    else:
-        outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
-        outputFile.write(result)
-        outputFile.close()
+        result = Encryptor.encrypt(result, key)
+    		
+    outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
+    #outputFile.write(result)
+    pickle.dump(result, outputFile)	
+    outputFile.close()
 
 def writeStash(stash, maxDataLength):      # stash is a list of nodes in the stash
     if not os.path.exists(home + "/Dropbox/stash"):
@@ -75,8 +76,7 @@ def readStash(maxDataLength):         # returns a list where each element is a b
     inputFile = open(home + "/Dropbox/stash", "rb")
     result = []
     
-    # Same problem as in readBucket(). Try to read it less times.
-    
+    # Same problem as in readBucket(). Try to read it less times.    
     while True:
         #print ("loop")
         leafBytes = inputFile.read(4)
