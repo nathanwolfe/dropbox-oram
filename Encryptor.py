@@ -7,22 +7,13 @@ def mask(key, maskNum):
     cipher = AES.new(key, AES.MODE_ECB) 
     return cipher.encrypt(maskNum)
 
-def read(path, key):	# I modified this function to match the change in write(). Look at write() for explanation
-    inputFile = open(path, "rb")
-    seed = int.from_bytes(inputFile.read(16), byteorder="big")
-    data = inputFile.read()    	
-    inputFile.close()
-
+def decrypt(data, key):	# I modified this function to match the change in write(). Look at write() for explanation
+    seed = int.from_bytes(data[0:16], byteorder="big")
     cipher = AES.new(key, AES.MODE_CTR, counter=Counter.new(128, initial_value=seed))
-    result = cipher.decrypt(data)	  
+    result = cipher.decrypt(data[16:])	  
     return result
 
-def write(path, data, key):
-#    dirs = path[:(path.rfind("/"))]
-#    if not os.path.exists(dirs):
-#        os.makedirs(dirs) 
-#	I think you have already checked this in DBFileSys.py
-
+def encrypt(data, key):
 	# Your original code
 	# + Good: clean and easy to follow.
 	# - Drawback: you are truncating 'data' too many times. 
@@ -91,7 +82,4 @@ def write(path, data, key):
 	# With this version, it is even hard to tell whether encryption is on or off! (PyCrypto did a great job!)
     cipher = AES.new(key, AES.MODE_CTR, counter=Counter.new(128, initial_value=seed))
     result += cipher.encrypt(data)
-	
-    outputFile = open(path, "wb")
-    outputFile.write(result)		
-    outputFile.close()
+    return result
