@@ -39,17 +39,15 @@ def TestRepeatRW() :
     
 
 def TestGeneral() :
-    
-	# Check: The following parameter seems to trigger an assertion
 	
-    #random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
+    random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
 					# Comment: When you fixed this bug, remove the previous line so you can test with random input again.
 	
     oramsize = 101
     #minoramsize = 7
     z = 3
-    maxStashSize = 3
-    segSize = 100
+    maxStashSize = 30
+    segSize = 4096
     oram = Oram.Oram(oramsize, z, segSize, maxStashSize, 1.8, 2, 2.2)
     
     check  = {}
@@ -58,8 +56,6 @@ def TestGeneral() :
     
     lastStashSize = 0
     currentStashSize = 0
-	
-    
 	
     for key in range(1, numKeys) :                 # writes a "random" string to each key from 0 to N
         data = "v" + str(random.randint(1,1000))
@@ -72,7 +68,8 @@ def TestGeneral() :
             print("Stash increases by more than 1")			
             exit(0)
         lastStashSize = currentStashSize			
-        
+    
+    start = time.clock()    
     for i in range(0, numTests):        # does a random operation
         operation = random.random()
         key = random.randint(1, numKeys-1)
@@ -108,8 +105,10 @@ def TestGeneral() :
         #     exit(0)
             
         lastStashSize = currentStashSize
-        
+    
+    timeTaken = time.clock() - start   
     print("final stash size:", currentStashSize)
+    print("Elapsed time: " + str(timeTaken))
     print("TestGeneral Passed")
 
 def TestBackEv():
@@ -332,10 +331,10 @@ def TestVCache():
      
 #TestBasic()
 #TestRepeatRW()
-#TestGeneral()
+TestGeneral()
 #TestBackEv()
 #cProfile.run('ORAMvsNormal()')
-ORAMvsNormal()
+#ORAMvsNormal()
 #TestSegSize()
 #TestMultiBlock()
 #TestBlockPack()
