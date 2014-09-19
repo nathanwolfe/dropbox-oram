@@ -7,11 +7,11 @@ home = expanduser("~")
 #print (home)
 
 bucketLoc = "/Dropbox/buckets/"
-useSync = True
+useSync = False
 if useSync == False:
     bucketLoc = "/Documents/buckets/"
 
-encrypt = False
+encrypt = True
 key = "16characterslong"
 
 def readBucket(bucketID, maxDataLength):
