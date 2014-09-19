@@ -10,6 +10,8 @@ bucketLoc = "/Dropbox/buckets/"
 useSync = False
 if useSync == False:
     bucketLoc = "/Documents/buckets/"
+    
+#bucketLoc = "./buckets/"
 
 encrypt = True
 key = "16characterslong"
@@ -25,7 +27,7 @@ def readBucket(bucketID, maxDataLength):
         bytesIn = inputFile.read()
         inputFile.close()
     result = []
-    
+
     while True:
         leafBytes = bytesIn[:4]
         bytesIn = bytesIn[4:]
@@ -38,7 +40,7 @@ def readBucket(bucketID, maxDataLength):
         data = bytesIn[:dataLength]
         bytesIn = bytesIn[maxDataLength:]
         result.append(Block.Block(int.from_bytes(leafBytes, byteorder = "little"), int.from_bytes(segIDBytes, byteorder = "little"), data))
-
+    
     return result
 
 def writeBucket(bucketID, blocks, maxDataLength):
