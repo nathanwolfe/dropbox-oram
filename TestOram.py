@@ -152,7 +152,7 @@ def TestBackEv():
 
 def createTestFile(size):
     file = open("TestFiles/test" + str(size) + ".txt", "w")
-    file.write('0' * size)
+    file.write('0' * size * 1024)
     file.close()			
 		
 def ORAMvsNormal():
@@ -164,7 +164,7 @@ def ORAMvsNormal():
         oram.write("TestFiles/test" + str(1 << i) + ".txt")
         
     total = 0
-    numTests = 5000
+    numTests = 1000
     for i in range(numTests):
         fileName = getFile()
         start = time.clock()
@@ -211,7 +211,7 @@ def ORAMvsNormal():
 
     
 def TestSegSize():    # optimal = 64kB
-    numTests = 2000
+    numTests = 1000
     segSize = 1024 * 8
     while segSize <= 1024 * 2048:
         total = 0
@@ -238,9 +238,9 @@ def TestMultiBlock():
         total = 0
         oram = UserFileSys.UserFileSys(101, 3, 65536, 10, 1.8, 2.0, 2.2, i)
         oram._oram.autoResize = False
-        for i in range (2,13):
-            createTestFile(1 << i)		
-            oram.write("TestFiles/test" + str(1 << i) + ".txt")
+        for k in range (2,13):
+            createTestFile(1 << k)		
+            oram.write("TestFiles/test" + str(1 << k) + ".txt")
             
         for j in range(numTrials):
             start = time.clock()
@@ -268,7 +268,7 @@ def TestBlockPack(testFile):
     oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram.blockPack = True
     start = time.clock()
-    for i in range(2, numTests):
+    for i in range(0, numTests):
         oram.write(testFile + "_" + str(i) + ".txt")
         #oram.read(testFile + "_" + str(i) + ".txt")
     timeTaken = time.clock() - start
@@ -346,5 +346,7 @@ def TestVCache():
 ORAMvsNormal()
 #TestSegSize()
 #TestMultiBlock()
-#TestBlockPack()
+#TestBlockPack("TestFiles/test16.txt")
+#TestBlockPack("TestFiles/test32.txt")
+#TestBlockPack("TestFiles/test70.txt")
 #TestGrowShrink("overhead")
