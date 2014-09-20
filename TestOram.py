@@ -6,9 +6,12 @@ import os
 import shutil
 import cProfile
 import Encryptor
+import pickle
 
 from os.path import expanduser
 home = expanduser("~")
+
+key = "16characterslong"
 
 
 def TestBasic() :
@@ -171,7 +174,7 @@ def ORAMvsNormal():
         total += timeTaken
     print ("Total Time with ORAM (encryption): " + str(total))
 
-    """
+    
     total = 0
     for i in range(numTests):
         fileName = getFile()
@@ -179,11 +182,17 @@ def ORAMvsNormal():
         data = file.read()
         file.close()
         start = time.clock()
-        Encryptor.write(home + "/Dropbox/testEncrypt", data, "16characterslong")
-        Encryptor.read(home + "/Dropbox/testEncrypt", "16characterslong")
+        data = Encryptor.encrypt(data, key)
+        file = open(fileName + "_encrypted", "w")
+        file.write(data)
+        file.close()
+        file = open(fileName + "_encrypted", "r")
+        data = file.read()
+        file.close()
+        data = Encryptor.decrypt(data, key)
         timeTaken = time.clock() - start
         total += timeTaken
-    print("Total Time without ORAM (encryption): " + str(total))"""
+    print("Total Time without ORAM (encryption): " + str(total))
 
         
     total = 0
