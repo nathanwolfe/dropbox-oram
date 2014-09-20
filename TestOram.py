@@ -161,7 +161,7 @@ def ORAMvsNormal():
         oram.write("TestFiles/test" + str(1 << i) + ".txt")
         
     total = 0
-    numTests = 1000
+    numTests = 5000
     for i in range(numTests):
         fileName = getFile()
         start = time.clock()
@@ -171,10 +171,13 @@ def ORAMvsNormal():
         total += timeTaken
     print ("Total Time with ORAM (encryption): " + str(total))
 
-    """total = 0
+    """
+    total = 0
     for i in range(numTests):
         fileName = getFile()
+        file = open(fileName, "r")
         data = file.read()
+        file.close()
         start = time.clock()
         Encryptor.write(home + "/Dropbox/testEncrypt", data, "16characterslong")
         Encryptor.read(home + "/Dropbox/testEncrypt", "16characterslong")
@@ -199,16 +202,15 @@ def ORAMvsNormal():
 
     
 def TestSegSize():    # optimal = 64kB
-    numTests = 1000
+    numTests = 2000
     segSize = 1024 * 8
     while segSize <= 1024 * 2048:
         total = 0
         oram = UserFileSys.UserFileSys(1301, 3, segSize, 100, 1.8, 2.0, 2.2, 1)
         oram._oram.autoResize = False
-        multFact = 1
-        for i in range (0,11):
-            oram.write("test" + str(4*multFact) + ".txt")
-            multFact*=2
+        for i in range (2,13):
+            createTestFile(1 << i)		
+            oram.write("TestFiles/test" + str(1 << i) + ".txt")
             
         for i in range(numTests):
             start = time.clock()
@@ -227,10 +229,9 @@ def TestMultiBlock():
         total = 0
         oram = UserFileSys.UserFileSys(101, 3, 65536, 10, 1.8, 2.0, 2.2, i)
         oram._oram.autoResize = False
-        multFact = 1
-        for i in range (0,11):
-            oram.write("test" + str(4*multFact) + ".txt")
-            multFact+=2
+        for i in range (2,13):
+            createTestFile(1 << i)		
+            oram.write("TestFiles/test" + str(1 << i) + ".txt")
             
         for j in range(numTrials):
             start = time.clock()
