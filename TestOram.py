@@ -174,19 +174,19 @@ def ORAMvsNormal():
         total += timeTaken
     print ("Total Time with ORAM (encryption): " + str(total))
 
-    
+
     total = 0
     for i in range(numTests):
         fileName = getFile()
-        file = open(fileName, "r")
+        file = open(fileName, "rb")
         data = file.read()
         file.close()
         start = time.clock()
         data = Encryptor.encrypt(data, key)
-        file = open(fileName + "_encrypted", "w")
+        file = open(fileName[:-4] + "_encrypted.txt", "wb")
         file.write(data)
         file.close()
-        file = open(fileName + "_encrypted", "r")
+        file = open(fileName[:-4] + "_encrypted.txt", "rb")
         data = file.read()
         file.close()
         data = Encryptor.decrypt(data, key)
