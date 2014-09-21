@@ -183,12 +183,8 @@ def ORAMvsNormal():
         file.close()
         start = time.clock()
         data = Encryptor.encrypt(data, key)
-        file = open(fileName[:-4] + "_encrypted.txt", "wb")
-        file.write(data)
-        file.close()
-        file = open(fileName[:-4] + "_encrypted.txt", "rb")
-        data = file.read()
-        file.close()
+        pickle.dump(data, fileName[:-4] + "_encrypted.txt")
+        data = pickle.load(fileName[:-4] + "_encrypted.txt")
         data = Encryptor.decrypt(data, key)
         timeTaken = time.clock() - start
         total += timeTaken
