@@ -178,13 +178,17 @@ def ORAMvsNormal():
     total = 0
     for i in range(numTests):
         fileName = getFile()
-        file = open(fileName, "rb")
-        data = file.read()
-        file.close()
+        inputFile = open(fileName, "rb")
+        data = inputFile.read()
+        inputFile.close()
         start = time.clock()
         data = Encryptor.encrypt(data, key)
-        pickle.dump(data, fileName[:-4] + "_encrypted.txt")
-        data = pickle.load(fileName[:-4] + "_encrypted.txt")
+        outputFile = open(fileName[:-4] + "_encrypted.txt", "wb")
+        pickle.dump(data, outputFile)
+        outputFile.close()
+        inputFile = open(fileName[:-4] + "_encrypted.txt", "rb")
+        data = pickle.load(inputFile)
+        inputFile.close()
         data = Encryptor.decrypt(data, key)
         timeTaken = time.clock() - start
         total += timeTaken
