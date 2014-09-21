@@ -156,6 +156,7 @@ def createTestFile(size):
     file.close()			
 		
 def ORAMvsNormal():
+    numTests = 1000
     oram = UserFileSys.UserFileSys(1301, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram._oram.autoResize = False
 	
@@ -164,20 +165,23 @@ def ORAMvsNormal():
         oram.write("TestFiles/test" + str(1 << i) + ".txt")
         
     total = 0
-    numTests = 1000
+    totalSize = 0
     for i in range(numTests):
         fileName = getFile()
+        totalSize += int(fileName[14:fileName.index(".")])
         start = time.clock()
         oram.read(fileName)
-        timeTaken = time.clock() - start
-        
+        timeTaken = time.clock() - start    
         total += timeTaken
-    print ("Total Time with ORAM (encryption): " + str(total))
+    print(total)
+    print ("Throughput Disk + ORAM + Encryption: " + str(totalSize/total))
 
 
     total = 0
+    totalSize = 0
     for i in range(numTests):
         fileName = getFile()
+        totalSize += int(fileName[14:fileName.index(".")])
         file = open(fileName, "rb")
         data = file.read()
         file.close()
@@ -188,13 +192,16 @@ def ORAMvsNormal():
         data = Encryptor.decrypt(data, key)
         timeTaken = time.clock() - start
         total += timeTaken
-    print("Total Time without ORAM (encryption): " + str(total))
+    print(total)
+    print("Throughput Disk + Encryption: " + str(totalSize/total))
 
         
     total = 0
+    totalSize = 0
     for i in range(numTests):
         start = time.clock()
         fileName = getFile()
+        totalSize += int(fileName[14:fileName.index(".")])
         file = open(fileName, "r")
         data = file.read()
         file.close()
@@ -203,7 +210,8 @@ def ORAMvsNormal():
         file.close()		
         total += (time.clock()-start)
     avg = total/numTests
-    print ("Total Time without ORAM (no encryption): " + str(total))
+    print(total)
+    print ("Throughput Disk: " + str(totalSize/total))
 
     
 def TestSegSize():    # optimal = 64kB
@@ -211,6 +219,7 @@ def TestSegSize():    # optimal = 64kB
     segSize = 1024 * 8
     while segSize <= 1024 * 2048:
         total = 0
+        totalSize = 0
         oram = UserFileSys.UserFileSys(1301, 3, segSize, 100, 1.8, 2.0, 2.2, 1)
         oram._oram.autoResize = False
         for i in range (2,13):
@@ -218,13 +227,14 @@ def TestSegSize():    # optimal = 64kB
             oram.write("TestFiles/test" + str(1 << i) + ".txt")
             
         for i in range(numTests):
-            start = time.clock()
             fileName = getFile()
+            totalSize += int(fileName[14:fileName.index(".")])
+            start = time.clock()
             oram.read(fileName)
             timeTaken = time.clock() - start
             total+=timeTaken
             
-        print(str(segSize) + " " + str(total))
+        print(str(segSize) + " " + str(totalSize/total))
         segSize *= 2
 
 def TestMultiBlock():
@@ -232,6 +242,7 @@ def TestMultiBlock():
     numTests = 5
     for i in range(1, numTests+1):
         total = 0
+        totalSize = 0
         oram = UserFileSys.UserFileSys(101, 3, 65536, 10, 1.8, 2.0, 2.2, i)
         oram._oram.autoResize = False
         for k in range (2,13):
@@ -239,28 +250,33 @@ def TestMultiBlock():
             oram.write("TestFiles/test" + str(1 << k) + ".txt")
             
         for j in range(numTrials):
-            start = time.clock()
             fileName = getFile()
+            totalSize += int(fileName[14:fileName.index(".")])
+            start = time.clock()
             oram.read(fileName)
             timeTaken = time.clock() - start
             total+=timeTaken
             
-        print(str(i) + ": " + str(total))
+        print(str(i) + ": " + str(totalSize/total))
 
 def TestBlockPack(testFile):
     #random.seed(5)
     numTests = 1000
+    totalSize = 0
     oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)            # change segSize, and write appropriate file
     for i in range(0, numTests):
         shutil.copyfile(testFile, testFile + "_" + str(i) + ".txt")
-        
+        totalSize += int(testFile[14:testFile.index(".")])
+
     for i in range(0, numTests):
         oram.write(testFile + "_" + str(i) + ".txt")
+        
     start = time.clock()
     for i in range(numTests):
         oram.read(testFile + "_" + str(i) + ".txt")
     timeTaken = time.clock() - start
-    print("Without Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(timeTaken))
+    print("Without Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(totalSize/timeTaken))
+
 
     oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram.blockPack = True
@@ -270,7 +286,7 @@ def TestBlockPack(testFile):
     for i in range(numTests):
         oram.read(testFile + "_" + str(i) + ".txt")
     timeTaken = time.clock() - start
-    print("With Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(timeTaken))
+    print("With Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(totalSize/timeTaken))
     
 def TestGrowShrink(version):
     if version == "utilization":
@@ -341,10 +357,13 @@ def TestVCache():
 #cProfile.run('TestGeneral()')
 #TestBackEv()
 #cProfile.run('ORAMvsNormal()')
-#ORAMvsNormal()
-#TestSegSize()
-#TestMultiBlock()
-#TestBlockPack("TestFiles/test16.txt")
-#TestBlockPack("TestFiles/test32.txt")
-#TestBlockPack("TestFiles/test70.txt")
-TestGrowShrink("overhead")
+ORAMvsNormal()
+print()
+TestSegSize()
+print()
+TestMultiBlock()
+print()
+TestBlockPack("TestFiles/test16.txt")
+TestBlockPack("TestFiles/test32.txt")
+TestBlockPack("TestFiles/test70.txt")
+#TestGrowShrink("overhead")
