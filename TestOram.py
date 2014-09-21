@@ -254,19 +254,21 @@ def TestBlockPack(testFile):
     for i in range(0, numTests):
         shutil.copyfile(testFile, testFile + "_" + str(i) + ".txt")
         
-    start = time.clock()
     for i in range(0, numTests):
         oram.write(testFile + "_" + str(i) + ".txt")
-        #oram.read(testFile + "_" + str(i) + ".txt")
+    start = time.clock()
+    for i in range(numTests):
+        oram.read(testFile + "_" + str(i) + ".txt")
     timeTaken = time.clock() - start
     print("Without Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(timeTaken))
 
     oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram.blockPack = True
-    start = time.clock()
     for i in range(0, numTests):
         oram.write(testFile + "_" + str(i) + ".txt")
-        #oram.read(testFile + "_" + str(i) + ".txt")
+    start = time.clock()
+    for i in range(numTests):
+        oram.read(testFile + "_" + str(i) + ".txt")
     timeTaken = time.clock() - start
     print("With Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(timeTaken))
     
@@ -293,14 +295,14 @@ def TestGrowShrink(version):
             print(str(i) + " " + str(timeTaken))
 
     if version == "overhead":
-        numTests = 2000
+        numTests = 1000
         for i in range(numTests):
-            shutil.copyfile("test64.txt", "test64_" + str(i) + ".txt")
+            shutil.copyfile("TestFiles/test64.txt", "TestFiles/test64_" + str(i) + ".txt")
 
         oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
         start = time.clock()
         for i in range(numTests):
-            oram.write("test64_" + str(i) + ".txt")
+            oram.write("TestFiles/test64_" + str(i) + ".txt")
         timeTaken = time.clock() - start
         avgGrowthTime = oram._oram._tree.totalTimeGrowth / oram._oram._tree.numGrowth
         print("Avg growth time: " + str(avgGrowthTime))
@@ -310,7 +312,7 @@ def TestGrowShrink(version):
         oram._oram.autoResize = False
         start = time.clock()
         for i in range(numTests):
-            oram.write("test64_" + str(i) + ".txt")
+            oram.write("TestFiles/test64_" + str(i) + ".txt")
         timeTaken = time.clock() - start
         print("Auto Resize OFF: " + str(timeTaken))
                 
@@ -339,10 +341,10 @@ def TestVCache():
 #cProfile.run('TestGeneral()')
 #TestBackEv()
 #cProfile.run('ORAMvsNormal()')
-ORAMvsNormal()
+#ORAMvsNormal()
 #TestSegSize()
 #TestMultiBlock()
 #TestBlockPack("TestFiles/test16.txt")
 #TestBlockPack("TestFiles/test32.txt")
 #TestBlockPack("TestFiles/test70.txt")
-#TestGrowShrink("overhead")
+TestGrowShrink("overhead")
