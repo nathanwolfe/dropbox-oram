@@ -20,6 +20,9 @@ class Oram:
 
         self.autoResize = True
         self.showResize = False
+        self.recordResize = True
+        if self.recordResize:
+            self.GSOut = open("gs.csv", "w")
 
         self.useVCache = True
         self.debug = False
@@ -75,6 +78,9 @@ class Oram:
                     dataList[i] = None
                 else:
                     dataList[i] = reqResult.getData()
+
+        if self.recordResize:
+            self.GSOut.write(str(self._segCounter) + "," + str(self._tree.getSize() * self._z) + "\n")
                 
         if all(x is None for x in segIDList):
             return dataList

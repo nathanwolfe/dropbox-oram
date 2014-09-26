@@ -343,7 +343,7 @@ def getFile():     # returns name of file based on distribution graph
     probTable = [0.0, 0.5, 0.6, 0.8, 0.9, 0.92, 0.95, 0.97, 0.98, 0.99, 0.995, 1.0]
     for i in range(len(probTable)-1):
         if prob	>= probTable[i] and prob < probTable[i+1]:
-            return ("TestFiles/test" + str(4 << i) + ".txt")
+            return ("testFiles/test" + str(4 << i) + ".txt")
 
 def TestVCache():
     oram = UserFileSys.UserFileSys(101, 3, 4096, 100, 1.8, 2.0, 2.2, 1)
@@ -354,6 +354,23 @@ def TestVCache():
 
     print(oram._oram.VCacheCounter)
     print(oram._oram.totalCounter)
+
+def PlotGS():
+    oram = UserFileSys.UserFileSys(3, 3, 4096, 100, 1.8, 2.0, 2.2, 1)
+    numTests = 32
+    files = []
+    for i in range(numTests):
+        rand = random.random()
+        if len(files) > 0 and rand < 0.4:
+            target = random.choice(files)
+            files.remove(target)
+            oram.delete("temp/" + str(target) + ".txt")
+        else:
+            files.append(i)
+            os.system("cp " + getFile() + " temp/" + str(i) + ".txt")
+            oram.write("temp/" + str(i) + ".txt")
+        print(i)
+    oram._oram.GSOut.close()
  
 #TestBasic()
 #TestRepeatRW()
@@ -361,13 +378,14 @@ def TestVCache():
 #cProfile.run('TestGeneral()')
 #TestBackEv()
 #cProfile.run('ORAMvsNormal()')
-ORAMvsNormal()
-print()
-TestSegSize()
-print()
-TestMultiBlock()
-print()
-TestBlockPack("TestFiles/test16.txt")
-TestBlockPack("TestFiles/test32.txt")
-TestBlockPack("TestFiles/test70.txt")
+# ORAMvsNormal()
+# print()
+# TestSegSize()
+# print()
+# TestMultiBlock()
+# print()
+# TestBlockPack("TestFiles/test16.txt")
+# TestBlockPack("TestFiles/test32.txt")
+# TestBlockPack("TestFiles/test70.txt")
 #TestGrowShrink("overhead")
+PlotGS()
