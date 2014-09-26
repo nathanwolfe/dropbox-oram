@@ -20,7 +20,7 @@ class Oram:
 
         self.autoResize = True
         self.showResize = False
-        self.recordResize = True
+        self.recordResize = False
         if self.recordResize:
             self.GSOut = open("gs.csv", "w")
 
