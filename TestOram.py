@@ -218,8 +218,8 @@ def TestBlockPack():
         oram.read("2014_Science_Fair - Copy (" + str(i) + ").jpg")
     print(oram._oram._tree.getSize())
     print(oram._oram._stash.getSize())
-        
     
+
 #TestBasic()
 #TestRepeatRW()
 #TestGeneral()
