@@ -19,7 +19,7 @@ def getMaxLevel(leaf1, leaf2):
         leaf2 = leaf2 >> 1
 
     # now leaf1 and leaf2 are on the same level
-    """<<<<<<< HEAD
+    """
 
     revBin(leaf1)
     revBin(leaf2)
@@ -48,7 +48,6 @@ def getMaxLevel(leaf1, leaf2):
     """
     b = leaf1 ^ leaf2	      # bitwise difference
     diff = 0
->>>>>>> bc1f66f3963025bb594d094651d85475fc451fbb
 
     while diff > 0:
         b = b >> 1

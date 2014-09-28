@@ -5,6 +5,14 @@ import time
 import os
 import shutil
 import cProfile
+import Encryptor
+import pickle
+
+from os.path import expanduser
+home = expanduser("~")
+
+key = "16characterslong"
+
 
 def TestBasic() :
     oramsize = 1 << 4 - 1
@@ -39,17 +47,15 @@ def TestRepeatRW() :
     
 
 def TestGeneral() :
-    
-	# Check: The following parameter seems to trigger an assertion
 	
-    #random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
+    random.seed(1)	# this guarantees we get the same random numbers, and thus same results on every run
 					# Comment: When you fixed this bug, remove the previous line so you can test with random input again.
 	
     oramsize = 101
     #minoramsize = 7
     z = 3
-    maxStashSize = 3
-    segSize = 100
+    maxStashSize = 30
+    segSize = 4096
     oram = Oram.Oram(oramsize, z, segSize, maxStashSize, 1.8, 2, 2.2)
     
     check  = {}
@@ -58,8 +64,6 @@ def TestGeneral() :
     
     lastStashSize = 0
     currentStashSize = 0
-	
-    
 	
     for key in range(1, numKeys) :                 # writes a "random" string to each key from 0 to N
         data = "v" + str(random.randint(1,1000))
@@ -72,7 +76,8 @@ def TestGeneral() :
             print("Stash increases by more than 1")			
             exit(0)
         lastStashSize = currentStashSize			
-        
+    
+    start = time.clock()    
     for i in range(0, numTests):        # does a random operation
         operation = random.random()
         key = random.randint(1, numKeys-1)
@@ -108,8 +113,10 @@ def TestGeneral() :
         #     exit(0)
             
         lastStashSize = currentStashSize
-        
+    
+    timeTaken = time.clock() - start   
     print("final stash size:", currentStashSize)
+    print("Elapsed time: " + str(timeTaken))
     print("TestGeneral Passed")
 
 def TestBackEv():
@@ -143,76 +150,141 @@ def TestBackEv():
         print ("\tMax Stash Size = " + str(maxStashSize) + ": dummy- " + str(numBackEv) + ", actual- " + str(2*oramsize + numKeys))
         print ("\t\tRatio = " + str(numBackEv / (2*oramsize + numKeys)))
 
+def createTestFile(size):
+    file = open("TestFiles/test" + str(size) + ".txt", "w")
+    file.write('0' * size * 1024)
+    file.close()			
+		
 def ORAMvsNormal():
-    from os.path import expanduser
-    home = expanduser("~")
-
-    oram = UserFileSys.UserFileSys(3, 3, 4096, 10, 1.8, 2.0, 2.2)
-    total = 0
-    numTests = 100
-    fileName = "Birds.jpg"
-    for i in range(numTests):
-        start = time.clock()
-        oram.write(fileName)
-        oram.read(fileName)
-        oram.delete(fileName)
-        timeTaken = time.clock() - start
-        #print(timeTaken)
-        #print(oram._Oram._tree.getSize())
+    numTests = 1000
+    oram = UserFileSys.UserFileSys(1301, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+    oram._oram.autoResize = False
+	
+    for i in range (2,13):
+        createTestFile(1 << i)		
+        oram.write("TestFiles/test" + str(1 << i) + ".txt")
         
+    total = 0
+    totalSize = 0
+    for i in range(numTests):
+        fileName = getFile()
+        totalSize += int(fileName[14:fileName.index(".")])
+        start = time.clock()
+        oram.read(fileName)
+        timeTaken = time.clock() - start    
         total += timeTaken
+    print(total)
+    print ("Throughput Disk + ORAM + Encryption: " + str(totalSize/total))
 
-    avg = total / numTests
-    print ("Average time taken with ORAM for file " + fileName + ": " + str(avg))
 
-    """total = 0
+    total = 0
+    totalSize = 0
+    for i in range(numTests):
+        fileName = getFile()
+        totalSize += int(fileName[14:fileName.index(".")])
+        inputFile = open(fileName, "rb")
+        data = inputFile.read()
+        inputFile.close()
+        start = time.clock()
+        data = Encryptor.encrypt(data, key)
+        outputFile = open(fileName[:-4] + "_encrypted.txt", "wb")
+        pickle.dump(data, outputFile)
+        outputFile.close()
+        inputFile = open(fileName[:-4] + "_encrypted.txt", "rb")
+        data = pickle.load(inputFile)
+        inputFile.close()
+        data = Encryptor.decrypt(data, key)
+        timeTaken = time.clock() - start
+        total += timeTaken
+    print(total)
+    print("Throughput Disk + Encryption: " + str(totalSize/total))
+
+        
+    total = 0
+    totalSize = 0
     for i in range(numTests):
         start = time.clock()
-        shutil.copyfile(fileName, home + "/Dropbox/test.MPG")
+        fileName = getFile()
+        totalSize += int(fileName[14:fileName.index(".")])
+        file = open(fileName, "r")
+        data = file.read()
+        file.close()
+        file = open(fileName, "w")
+        file.write(data)
+        file.close()		
         total += (time.clock()-start)
     avg = total/numTests
-    print ("Average time taken without ORAM for file " + fileName + ": " + str(avg))
-    """
-def TestSegSize():
-    fileName = "Zou- Mathematics Solutions.pdf"
-    numTests = 100
-    segSize = 1024
-    while segSize <= 33000:
+    print(total)
+    print ("Throughput Disk: " + str(totalSize/total))
+
+    
+def TestSegSize():    # optimal = 64kB
+    numTests = 1000
+    segSize = 1024 * 8
+    while segSize <= 1024 * 2048:
         total = 0
-        oram = UserFileSys.UserFileSys(101, 3, segSize, 10, 1.8, 2.0, 2.2)
+        totalSize = 0
+        oram = UserFileSys.UserFileSys(1301, 3, segSize, 100, 1.8, 2.0, 2.2, 1)
+        oram._oram.autoResize = False
+        for i in range (2,13):
+            createTestFile(1 << i)		
+            oram.write("TestFiles/test" + str(1 << i) + ".txt")
+            
         for i in range(numTests):
+            fileName = getFile()
+            totalSize += int(fileName[14:fileName.index(".")])
             start = time.clock()
-            oram.write(fileName)
             oram.read(fileName)
-            oram.delete(fileName)
             timeTaken = time.clock() - start
             total+=timeTaken
-        avg = total / numTests
-        print(str(segSize) + " " + str(avg))
+            
+        print(str(segSize) + " " + str(totalSize/total))
         segSize *= 2
 
 def TestMultiBlock():
-    fileName = "2014_Science_Fair.jpg"
     numTrials = 1000
     numTests = 5
-    for i in range(2, numTests+1):
+    for i in range(1, numTests+1):
         total = 0
-        oram = UserFileSys.UserFileSys(101, 3, 4096, 10, 1.8, 2.0, 2.2, i)
+        totalSize = 0
+        oram = UserFileSys.UserFileSys(101, 3, 65536, 10, 1.8, 2.0, 2.2, i)
+        oram._oram.autoResize = False
+        for k in range (2,13):
+            createTestFile(1 << k)		
+            oram.write("TestFiles/test" + str(1 << k) + ".txt")
+            
         for j in range(numTrials):
+            fileName = getFile()
+            totalSize += int(fileName[14:fileName.index(".")])
             start = time.clock()
-            oram.write(fileName)
             oram.read(fileName)
-            oram.delete(fileName)
             timeTaken = time.clock() - start
             total+=timeTaken
-        avg = total / numTrials
-        print(str(i) + ": " + str(avg))
+            
+        print(str(i) + ": " + str(totalSize/total))
 
-def TestBlockPack():
+def TestBlockPack(testFile):
     #random.seed(5)
-    numTests = 10
-    oram = UserFileSys.UserFileSys(101, 2, 80000, 10, 1.8, 2.0, 2.2, 1)
+    numTests = 1000
+    totalSize = 0
+    oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)            # change segSize, and write appropriate file
+    for i in range(0, numTests):
+        shutil.copyfile(testFile, testFile + "_" + str(i) + ".txt")
+        totalSize += int(testFile[14:testFile.index(".")])
+
+    for i in range(0, numTests):
+        oram.write(testFile + "_" + str(i) + ".txt")
+        
+    start = time.clock()
+    for i in range(numTests):
+        oram.read(testFile + "_" + str(i) + ".txt")
+    timeTaken = time.clock() - start
+    print("Without Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(totalSize/timeTaken))
+
+
+    oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram.blockPack = True
+<<<<<<< HEAD
     for i in range(2, numTests):
         oram.write("2014_Science_Fair - Copy (" + str(i) + ").jpg")
         oram.read("2014_Science_Fair - Copy (" + str(i) + ").jpg")
@@ -220,12 +292,109 @@ def TestBlockPack():
     print(oram._oram._stash.getSize())
     
 
+=======
+    for i in range(0, numTests):
+        oram.write(testFile + "_" + str(i) + ".txt")
+    start = time.clock()
+    for i in range(numTests):
+        oram.read(testFile + "_" + str(i) + ".txt")
+    timeTaken = time.clock() - start
+    print("With Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(totalSize/timeTaken))
+    
+def TestGrowShrink(version):
+    if version == "utilization":
+        numTests = 1000
+        
+        for j in range(numTests):
+            shutil.copyfile("test32.txt", "test32_" + str(j) + ".txt")
+            
+        for i in range(3):
+            if i==0:   # 0.45 - 0.55
+                oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+            elif i==1:  #0.42 - 0.58
+                oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.72, 2.0, 2.38, 1)
+            elif i==2:  #0.48 - 0.52
+                oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.92, 2.0, 2.08, 1)
+
+            start = time.clock()
+            for j in range(numTests):
+                oram.write("test32_" + str(j) + ".txt")
+            timeTaken = time.clock() - start
+
+            print(str(i) + " " + str(timeTaken))
+
+    if version == "overhead":
+        numTests = 1000
+        for i in range(numTests):
+            shutil.copyfile("TestFiles/test64.txt", "TestFiles/test64_" + str(i) + ".txt")
+
+        oram = UserFileSys.UserFileSys(3, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+        start = time.clock()
+        for i in range(numTests):
+            oram.write("TestFiles/test64_" + str(i) + ".txt")
+        timeTaken = time.clock() - start
+        avgGrowthTime = oram._oram._tree.totalTimeGrowth / oram._oram._tree.numGrowth
+        print("Avg growth time: " + str(avgGrowthTime))
+        print("Auto Resize ON: " + str(timeTaken))
+
+        oram = UserFileSys.UserFileSys(1501, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+        oram._oram.autoResize = False
+        start = time.clock()
+        for i in range(numTests):
+            oram.write("TestFiles/test64_" + str(i) + ".txt")
+        timeTaken = time.clock() - start
+        print("Auto Resize OFF: " + str(timeTaken))
+                
+
+    
+def getFile():     # returns name of file based on distribution graph
+    prob = random.random()
+    probTable = [0.0, 0.5, 0.6, 0.8, 0.9, 0.92, 0.95, 0.97, 0.98, 0.99, 0.995, 1.0]
+    for i in range(len(probTable)-1):
+        if prob	>= probTable[i] and prob < probTable[i+1]:
+            return ("testFiles/test" + str(4 << i) + ".txt")
+
+def TestVCache():
+    oram = UserFileSys.UserFileSys(101, 3, 4096, 100, 1.8, 2.0, 2.2, 1)
+    for i in range(1000):
+        shutil.copyfile("test4.txt", "test4_" + str(i) + ".txt")
+        oram.write("test4_" + str(i) + ".txt")
+        oram.read("test4_" + str(i) + ".txt")
+
+    print(oram._oram.VCacheCounter)
+    print(oram._oram.totalCounter)
+
+def PlotGS():
+    oram = UserFileSys.UserFileSys(3, 3, 4096, 100, 1.8, 2.0, 2.2, 1)
+    numTests = 32
+    files = []
+    for i in range(numTests):
+        rand = random.random()
+        if len(files) > 0 and rand < 0.4:
+            target = random.choice(files)
+            files.remove(target)
+            oram.delete("temp/" + str(target) + ".txt")
+        else:
+            files.append(i)
+            os.system("cp " + getFile() + " temp/" + str(i) + ".txt")
+            oram.write("temp/" + str(i) + ".txt")
+        print(i)
+    oram._oram.GSOut.close()
+ 
 #TestBasic()
 #TestRepeatRW()
 #TestGeneral()
+#cProfile.run('TestGeneral()')
 #TestBackEv()
 #cProfile.run('ORAMvsNormal()')
-#ORAMvsNormal()
-#TestSegSize()
-#TestMultiBlock()
-TestBlockPack()
+# ORAMvsNormal()
+# print()
+# TestSegSize()
+# print()
+# TestMultiBlock()
+# print()
+# TestBlockPack("TestFiles/test16.txt")
+# TestBlockPack("TestFiles/test32.txt")
+# TestBlockPack("TestFiles/test70.txt")
+#TestGrowShrink("overhead")
+PlotGS()

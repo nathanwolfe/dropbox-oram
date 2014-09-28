@@ -67,12 +67,12 @@ class UserFileSys:
                 dataSeg = allData[curPosition:curPosition+self._segSize]
 
                 if segNum == numSeg-1:       # we are at the last segment
-                    print(self._blockSpaceLeft)
+                    #print(self._blockSpaceLeft)
                     for key, spaceLeft in self._blockSpaceLeft.items():
                         if len(dataSeg) <= spaceLeft:
                             #print("entered")
                             lastSegID = key
-                            print("packed segID: " + str(lastSegID))
+                            #print("packed segID: " + str(lastSegID))
                             b"".join([dataSeg,self._oram.read(lastSegID)])   # **** not sure about this ****
                             self._segIDMap[userFileName + "_" + str(segNum)] = lastSegID
                             #print (userFileName + "_" + str(segNum))
@@ -108,14 +108,14 @@ class UserFileSys:
                     dataList.append(dataSeg)
                     self._curSegID += 1
                     curPosition += self._segSize
-
                     if len(segIDList) == self.multiBlock:
-                        print("test")
+                        #print("test")
                         self._oram.multiWrite(segIDList, dataList)
                         segIDList = []
                         dataList = []
 
-            self._oram.multiWrite(segIDList, dataList)
+            if segIDList != []:
+                self._oram.multiWrite(segIDList, dataList)
 
             self._segSizeMap[userFileName] = numSeg
 
@@ -130,7 +130,11 @@ class UserFileSys:
                 result = b""
                 for segNum in range(numSegments):
                     if len(segIDList) == self.multiBlock:
-                        result += b"".join(self._oram.multiRead(segIDList))
+                        fetch = self._oram.multiRead(segIDList)
+                        if None not in fetch:
+                            result += b"".join(fetch)
+                        else:
+                            print("fail", fetch.index(None))
                         segIDList = []
                     segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
                 result += b"".join(self._oram.multiRead(segIDList))
@@ -178,7 +182,8 @@ class UserFileSys:
                     segIDList = []
                 segIDList.append(self._segIDMap[userFileName + "_" + str(segNum)])
                 del self._segIDMap[userFileName + "_" + str(segNum)]
-            self._oram.multiDelete(segIDList)
+            if segIDList != []:
+                self._oram.multiDelete(segIDList)
             del self._segSizeMap[userFileName]
 
         else:

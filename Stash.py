@@ -16,7 +16,7 @@ class Stash:
         self._nodes.append(block)
 
     def deleteNode(self, index):
-        del self._nodes[index]
+        del self._nodes[index]	
 
     def getNodes(self):
         return self._nodes
@@ -35,10 +35,9 @@ class Stash:
     def evict(self, leaf):            # returns list of the blocks that go in each node on the path as a 2d list, should compare IDs and return if found as well
         numLevels = Util.levelNumber(leaf) + 1
         result = [0] * numLevels
-        
         for i in range(numLevels):
             result[i] = [Block.Block(0, 0, b"")] * self._z
-
+	
         stashIter = 0
         full = math.pow(2, numLevels) - 1    # "full vector" which has numLevel digits, and 1 means bucket has room for more
         pathVec = [0] * numLevels           # holds number of blocks in bucket occupied
@@ -77,36 +76,17 @@ class Stash:
                     
             
             else:
-                curLevel = Util.getMaxLevel(leaf, self._nodes[stashIter].getLeaf())
-                nodeEvicted = False 
-                
-                while curLevel > -1:
-                    #print ("another test")
-                    # This part of the code can be optimized
-                    # You can maintain an array indicating how many blocks have been evicted to each bucket.
-                    # Then you do not need to go into each slot.
-                    # Tou immediately know whether or not a block can go to a bucket, and if it can, which slot it should go to.
-                
-
-                    for treeNodeIter in range(self._z):
-                        #print (treeNodeIter)
-                        #print (curLevel)
-                        if result[curLevel][treeNodeIter].getSegID() == 0:
-                            #print ("entering")
-                            result[curLevel][treeNodeIter] = self._nodes[stashIter]       # puts the segID of the block in the first available space in the list
-                            #print(node.getSegID())
-                            self.deleteNode(stashIter)
-                            nodeEvicted = True
-                            break
-
-                    if nodeEvicted == False:                       # if a node was not evicted, then we move to the next node
-                        #print ("enter")
-                        curLevel-=1
-                        if (curLevel == -1):
-                            stashIter+=1
-                    else:
-                        break
-
+                curLevel = Util.getMaxLevel(leaf, self._nodes[stashIter].getLeaf())                
+                while curLevel > -1:             
+                    if pathVec[curLevel] < self._z:
+                        result[curLevel][pathVec[curLevel]] = self._nodes[stashIter]
+                        self.deleteNode(stashIter)
+                        pathVec[curLevel] += 1					
+                        break;
+                    curLevel -= 1						                   
+                if 	curLevel == -1:
+                    stashIter += 1	
+                				
         return result
 
     def correctLeaves(self, treeSize):

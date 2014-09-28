@@ -7,6 +7,7 @@ import random
 import Util
 import Block
 import DBFileSys
+import time
 
 class Tree:
     def __init__(self, nodeNumber, z, segmentSize):
@@ -19,6 +20,10 @@ class Tree:
         self._size = nodeNumber
         self._z = z
         self._segmentSize = segmentSize
+
+        self.numGrowth = 0
+        self.totalTimeGrowth = 0
+        
         for addr in range(1, nodeNumber + 1):
             self.writeBucket(addr, [Block.Block(0, 0, b"")] * z)
     
@@ -52,9 +57,13 @@ class Tree:
             self.writeBucket(addr, blocks.pop(0))
 
     def grow(self, numLeaves):
+        start = time.clock()
         for addr in range(self._size + 1, self._size + numLeaves + 1):
             self.writeBucket(addr, [Block.Block(0, 0, b"")] * self._z)
         self._size += numLeaves
+        timeTaken = time.clock() - start
+        self.numGrowth+=1
+        self.totalTimeGrowth+=timeTaken
 
     def shrink(self, numLeaves):
         assert (self._size > numLeaves), "tree cannot shrink further"

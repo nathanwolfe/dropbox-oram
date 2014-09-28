@@ -20,17 +20,23 @@ class Oram:
 
         self.autoResize = True
         self.showResize = False
+        self.recordResize = False
+        if self.recordResize:
+            self.GSOut = open("gs.csv", "w")
 
         self.useVCache = True
-        self.debug = False			
+        self.debug = False
         
+        self.VCacheCounter = 0
+        self.totalCounter= 0
+
 		# Comment: You may find it helpful to print out stash content when debugging
 		
-    def access(self, action, segIDList, dataList):		
+    def access(self, action, segIDList, dataList):
+        self.totalCounter += 1
 		# Comment: also need back ground eviction on a read operation       
 		# TODO: try to get the background eviction rate under different Z and tree size
-        segID = segIDList[0]
-        data = dataList[0]
+
         while (action == "read" or action == "write") and self._stash.getSize() > self._c:              # background eviction
             if self.debug:
                 print("backEv")
@@ -47,41 +53,53 @@ class Oram:
             if isinstance(dataList[i], str):
                 dataList[i] = dataList[i].encode("utf-8")
 
+        newLeaf = self._tree.randomLeaf()
+
         for i in range(len(dataList)):
             reqResult = self._stash.request(segIDList[i])
             if reqResult != "not found":
-                            # TODO: maintain some statistics on the hit rate of this optimization		
-                if self.debug:
+                self.VCacheCounter += 1
+
+                reqResult.setLeaf(newLeaf)
+                self._posMap.insert(segIDList[i], newLeaf)
+                if self.debug == True:
                     print("found in stash")
                 if action == "write":
-                    reqResult.setData(data)
+                    reqResult.setData(dataList[i])
                 if action != "delete":
                     self._stash.addNode(reqResult)
                 else:
-                    self._posMap.delete(segID)
+                    self._posMap.delete(segIDList[i])
                     self._segCounter -= 1
                 if self.useVCache == False:
                     self.treeAccess("dummy", segIDList, dataList)
                 segIDList[i] = None
-                dataList[i] = reqResult.getData()
+                if action == "write":
+                    dataList[i] = None
+                else:
+                    dataList[i] = reqResult.getData()
+
+        if self.recordResize:
+            self.GSOut.write(str(self._segCounter) + "," + str(self._tree.getSize() * self._z) + "\n")
                 
         if all(x is None for x in segIDList):
             return dataList
         else:
-            return self.treeAccess(action, segIDList, dataList)
+            segID = segIDList[0]
+            segID = next(x for x in segIDList if x is not None)
+            leaf = self._posMap.lookup(segID)
+            if leaf == -1:
+                assert ((action == "write" and segID > 0) or action == "backEv" or action == "dummy"), "tried to " + action + " nonexistent segID"
+                leaf = self._tree.randomLeaf()
+            if self.debug:
+                print("\treading from path ", leaf)
 
-    def treeAccess(self, action, segIDList, dataList):
-        segID = next(x for x in segIDList if x is not None)
-        leaf = self._posMap.lookup(segID)
-        if leaf == -1:
-            assert ((action == "write" and segID > 0) or action == "backEv" or action == "dummy"), "tried to " + action + " nonexistent segID"
-            leaf = self._tree.randomLeaf()
+            return self.treeAccess(action, segIDList, dataList, leaf, newLeaf)
+
+    def treeAccess(self, action, segIDList, dataList, leaf, newLeaf):
         transfer = self._tree.readPath(leaf)
         result = dataList
-        if self.debug:
-                print("\treading from path ", leaf)
-        newLeaf = self._tree.randomLeaf()
-        
+
         for bucket in transfer:
             for block in bucket:
                 if self.debug:
@@ -112,7 +130,7 @@ class Oram:
             if result[i] != None and action == "write":
                 newBlock = Block.Block(newLeaf, segIDList[i], dataList[i])
                 self._stash.addNode(newBlock)
-                self._posMap.insert(segIDList[i], newBlock.getLeaf())
+                self._posMap.insert(segIDList[i], newLeaf)
                 self._segCounter += 1
                 result[i] = None
                 if self.debug:

@@ -1,37 +1,46 @@
 import os
+import pickle as pickle
 import Block
+import Encryptor
 
 from os.path import expanduser
 home = expanduser("~")
 #print (home)
 
 bucketLoc = "/Dropbox/buckets/"
-useSync = False
+useSync = True
 if useSync == False:
     bucketLoc = "/Documents/buckets/"
+bucketLoc = "./buckets/"
+	
+encrypt = True
+key = "16characterslong"
 
 def readBucket(bucketID, maxDataLength):
     if not os.path.exists(home + bucketLoc):
         os.makedirs(home + bucketLoc)
+
     inputFile = open(home + bucketLoc + str(bucketID), "rb")         # rb = read binary
+    #bytesIn = inputFile.read()
+    bytesIn = pickle.load(inputFile)		
+    inputFile.close()
+    if encrypt:
+        bytesIn = Encryptor.decrypt(bytesIn, key)
+
     result = []
-    
-    # Same rule for disc appies here.
-    # Reading everthing in together should be faster than reading several times.
-    # Try to read the entire bucket file once and then parse it into whatever format you need.
-    # We should be able to do so because we know exactly how large each bucket is. 
-    
     while True:
-        leafBytes = inputFile.read(4)
+        leafBytes = bytesIn[:4]
+        bytesIn = bytesIn[4:]
         if leafBytes == b"":
             break                                             # break if end of file
-        segIDBytes = inputFile.read(4)
-        dataLength = int.from_bytes(inputFile.read(4), byteorder = "little")
-        data = inputFile.read(dataLength)
-        inputFile.read(maxDataLength - dataLength)
+        segIDBytes = bytesIn[:4]
+        bytesIn = bytesIn[4:]
+        dataLength = int.from_bytes(bytesIn[:4], byteorder = "little")
+        bytesIn = bytesIn[4:]
+        data = bytesIn[:dataLength]
+        bytesIn = bytesIn[maxDataLength:]
         result.append(Block.Block(int.from_bytes(leafBytes, byteorder = "little"), int.from_bytes(segIDBytes, byteorder = "little"), data))
-
-    inputFile.close()
+    
     return result
 
 def writeBucket(bucketID, blocks, maxDataLength):
@@ -41,8 +50,12 @@ def writeBucket(bucketID, blocks, maxDataLength):
     for block in blocks:
         result += writeBlock(block, maxDataLength)
     
+    if encrypt:
+        result = Encryptor.encrypt(result, key)
+    		
     outputFile = open(home + bucketLoc + str(bucketID), "wb")        # wb = write binary
-    outputFile.write(result)
+    #outputFile.write(result)
+    pickle.dump(result, outputFile)	
     outputFile.close()
 
 def writeStash(stash, maxDataLength):      # stash is a list of nodes in the stash
@@ -63,8 +76,7 @@ def readStash(maxDataLength):         # returns a list where each element is a b
     inputFile = open(home + "/Dropbox/stash", "rb")
     result = []
     
-    # Same problem as in readBucket(). Try to read it less times.
-    
+    # Same problem as in readBucket(). Try to read it less times.    
     while True:
         #print ("loop")
         leafBytes = inputFile.read(4)
