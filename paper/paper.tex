@@ -440,6 +440,8 @@ The abstract goes here.
 
 \section{Introduction}
 % no \IEEEPARstart
+cite \cite{graphite}
+
 This demo file is intended to serve as a ``starter file''
 for IEEE conference papers produced under \LaTeX\ using
 IEEEtran.cls version 1.7 and later.
@@ -584,14 +586,19 @@ The authors would like to thank...
 % <OR> manually copy in the resultant .bbl file
 % set second argument of \begin to the number of references
 % (used to reserve space for the reference number labels box)
-\begin{thebibliography}{1}
+% \begin{thebibliography}{1}
 
-\bibitem{IEEEhowto:kopka}
-H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+%\bibitem{IEEEhowto:kopka}
+%H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em 
+%plus 0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
 
-\end{thebibliography}
+%\end{thebibliography}
 
+{
+	\bstctlcite{bstctl:etal, bstctl:nodash, bstctl:simpurl}
+	\bibliographystyle{IEEEtran}
+	\bibliography{paper.bib}
+}
 
 
 
