@@ -440,18 +440,14 @@ The abstract goes here.
 
 \section{Introduction}
 % no \IEEEPARstart
-cite \cite{graphite}
+Nowadays, with many people possessing a multitude of devices, many of which have limited local storage, it is popular to store files in the cloud. Among the most popular cloud storage tools is Dropbox, which is compatible with computers and mobile devices, and allows users to store up to 2 GB of files for free (additional storage is available for a monthly fee).
+For most users, Dropbox presents adequate security; all files are encrypted when stored on their servers. Nevertheless some will rightfully find certain issues with their system. One is that Dropbox can see which files you edit. This, known as the user’s access pattern, is a key piece of information, which Dropbox could potentially gather. Of course, Dropbox itself is trustworthy, but nowadays the US government has the power to request data from web services, and the access pattern may be included. While standard encryption offers some protection, it does nothing to hide a user’s access pattern.
 
-This demo file is intended to serve as a ``starter file''
-for IEEE conference papers produced under \LaTeX\ using
-IEEEtran.cls version 1.7 and later.
-% You must have at least 2 lines in the paragraph with the drop letter
-% (should never be an issue)
-I wish you the best of success.
+Previous works have shown the importance in protecting access pattern. Memory access patterns can leak information such as a program’s control flow, which concerns conditional branches of the program and the order of commands executed \cite{Zhuang}. Also, M.S. Islam et al. have shown how, from an encrypted email repository, adversaries can infer 80\% of search queries simply from access patterns \cite{Islam}.
 
-\hfill mds
- 
-\hfill January 11, 2007
+Oblivious RAM (ORAM) is designed specifically to obfuscate what files in a database are being edited. This obfuscation of the user’s access pattern provides a critical additional layer of security. Thus, in our research project we have implemented an ORAM system for use with Dropbox. Along the way, we have discovered various innovations and optimizations that are unique to the Dropbox usage scenario. First, we have designed a system where ORAM on Dropbox can be used between multiple user computers. We also propose the optimizations of multi-block fetching, which improves performance by 51.9\%, and block packing, which saves 50-70\% storage overhead. Finally, we propose a dynamically growing and shrinking tree, providing us with the necessary storage size flexibility to work with Dropbox.
+
+In this paper, we will first provide some background on ORAM. We will then explain the system architecture behind our ORAM implementation. Then, after explaining our various optimizations and improvements to the base system, we will present some evaluations performed on the system to validate its effectiveness and assess its performance.
 
 \subsection{Subsection Heading Here}
 Subsection text here.
