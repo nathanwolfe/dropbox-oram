@@ -127,12 +127,12 @@
 % *** GRAPHICS RELATED PACKAGES ***
 %
 \ifCLASSINFOpdf
-  % \usepackage[pdftex]{graphicx}
+\usepackage[pdftex]{graphicx}
   % declare the path(s) where your graphic files are
-  % \graphicspath{{../pdf/}{../jpeg/}}
+\graphicspath{ {gfx/} }
   % and their extensions so you won't have to specify these with
   % every instance of \includegraphics
-  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\DeclareGraphicsExtensions{.pdf,.jpeg,.png}
 \else
   % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
   % will default to the driver specified in the system graphics.cfg if no
@@ -363,7 +363,7 @@
 Email: zouethan19@gmail.com}
 \and
 \IEEEauthorblockN{Nathan Wolfe}
-\IEEEauthorblockA{The Roxbury Latin School\\ Roxbury, MA\\
+\IEEEauthorblockA{The Roxbury Latin School\\ West Roxbury, MA\\
 Email: nathanwolferl@gmail.com}}
 
 % conference papers do not typically use \thanks and this command
@@ -451,7 +451,9 @@ In the past three decades, researchers have strived to improve the efficiency an
 \subsection{Path Oblvious RAM}
 To make the Oblivious RAM system more efficient, researchers introduced Path ORAM. In this system, blocks of data are arranged into a binary tree, with a few blocks at each node of the tree. (A binary tree, pictured in {\bf Figure 2-1}, is a tree in which each node has up to two children.) Instead of accessing all blocks in order to keep a specific one secret, we can simply access all blocks along the target’s path. “Accessing” in this context means fetching a block from untrusted storage and placing it in memory to be worked on. Work on a specific block is still hidden because a group of blocks are accessed together, but the groups are much smaller, improving speed. 
 
-diagram
+\begin{center}
+\noindent\includegraphics[width=6cm]{220.png}
+\end{center}
 
 We summarize how Path ORAM works here. The reader can refer to \cite{PathORAM} for more details. The tree is a binary tree data structure of height $L$ and $2^L$ leaves stored on the server as a one-dimensional array. The levels are numbered 0 to $L$, where level 0 is the root, level $L$ contains the leaves (in a complete tree), and levels in between contain non-leaf nodes. Each node in the binary tree is called a bucket, and contains $z$ blocks. If a bucket contains less than $z$ “real” blocks, the remainder are composed of dummy blocks, which are indistinguishable from real blocks because buckets are stored as encrypted fixed-size arrays.
 
@@ -469,17 +471,21 @@ We introduce the general organization of our design and several changes to the b
 
 \subsection{Big Picture}
 
-image
+\begin{center}
+\noindent\includegraphics[width=8.5cm]{310.png}
+\end{center}
 
 The overall interface of our design consists of three parts: the client, the Path ORAM implementation and Dropbox. Instead of the client directly writing and reading files to the Dropbox folder, we implemented the ORAM as an intermediary controller between the two. So a user will directly interact with the User File System (See Section 3.2), which in turn interacts with the ORAM controller to read and write files. The ORAM controller interacts with Dropbox by having the buckets of the tree written to the Dropbox folder. The Dropbox service will then sync the contents to the cloud. When reading a file, the bucket files are downloaded. As we will discuss in Section 3.3, a system with multiple computers accessing the same files requires the stash, position map, and other dictionaries to be written to Dropbox as well, which can be downloaded by other computers in the system. These structures which are normally kept in secure storage have to be encrypted with a secret key.
 
 \subsection{User File System}
 
-Dropbox’s baseline functions allow users to read and write files to a remote server in the cloud. Thus, we needed a way for our ORAM system to support the reading and writing of files of various sizes. Our solution was implementing the User File System, which enables the writing of files of different sizes. 
+Dropbox's baseline functions allow users to read and write files to a remote server in the cloud. Thus, we needed a way for our ORAM system to support the reading and writing of files of various sizes. Our solution was implementing the User File System, which enables the writing of files of different sizes. 
 
 The User File System interacts with the ORAM controller and provides the users with an interface to read, update and delete files of arbitrary size. The User File System consists of several dictionaries which hold vital metadata. Its main feature is to partition files into chunks, whose size is a parameter we call {\bf segment size}. These chunks are then each written to or read from the ORAM.
 
-image
+\begin{center}
+\noindent\includegraphics[width=8cm]{320.png}
+\end{center}
 
 To write a file, we split it up into subfiles each containing a number of bytes equal to (or less than, in the case of the last subfile) the segment size. We then assign each subfile a unique segment ID (stored in a dictionary) that allows us to be able to track the individual segments when we want to read the file again. Then, we write each file segment to the ORAM and update another dictionary with the number of partitioned pieces in that particular file. When reading a file, we look up the file name in a dictionary to retrieve the number of segments in that file. Then, we obtain the individual segment IDs of each data segment and fetch them from the ORAM. The data is then stitched together and returned to the user. Deleting a file works similarly to reading. After looking up the segment IDs of the file fragments, we simply delete those data from the ORAM and delete their corresponding information from the two metadata dictionaries.
 
@@ -534,30 +540,45 @@ For all experiments, the parameters were kept at constant values (unless we were
 
 For all the experiments except the one in Section 5.5, we utilize a distribution of files of various sizes to better simulate the contents/actions of a “real” file system, by reading/writing 1000 files based upon this cumulative distribution. This file distribution was chosen from previous work done on file system workloads \cite{roselli2000comparison}, and is reproduced below in Figure 5-1.
 
-graph
+\begin{center}
+\noindent\includegraphics[width=8.5cm]{510.png}
+\end{center}
 
 \subsection{Optimal Segment Size}
-graph
+\begin{center}
+\noindent\includegraphics[width=8.5cm]{520.png}
+\end{center}
 
 We performed a sweep study to evaluate the optimal segment size into which files are partitioned for storage. The sweep study shows that optimal segment size is 64 KB. It is not surprising that there is an optimal segment size. For small segment sizes, large files are handled inefficiently because they gets partitioned into many more pieces, resulting in a massive number of operations to read/write one file. For large segment sizes, small files take longer to read because of the majority of filler data in a block.
 
 \subsection{Initial ORAM Efficiency}
-graph
+\begin{center}
+\noindent\begin{tabular}{ l c r}
+  \bf{Disk} & \bf{Disk + Encryption} & \bf{Disk + ORAM} \\
+  42.13 & 24.42 & 0.66 \\
+\end{tabular}
+\end{center}
 
 We evaluated the overhead cost of implementing of Path ORAM with that of encryption alone. As a baseline we compared this to reading/writing files to the local disk.  Encryption added a little overhead (about 1.7 times slower) to the operations. Incorporating ORAM made the operations an additional 37 times slower when compared to encryption alone. As indicated by the table, the performance of our Dropbox-ORAM implementation without any optimizations is very slow, as expected. The remainder of this section evaluates the effectiveness of our improvements.
 
 \subsection{Multi-Block Fetching}
-graph
+\begin{center}
+\noindent\includegraphics[width=8.5cm]{540.png}
+\end{center}
 
 As noted in Section 4.1, we utilized multi-block fetching with segment grouping to improve the efficiency of our tree architecture. From the graph we can see that the optimal grouping size appears to be 3, which also indicates that multiple block fetching does improve performance. However, larger grouping sizes create more congestion in some paths. To compensate for congestion, a technique called background eviction has to be employed, which takes additional overhead \cite{oram-isca13, Yu14DSB}.
 
 \subsection{Block Packing}
-two graphs
+\begin{center}
+\noindent\includegraphics[width=4.25cm]{550.png}\includegraphics[width=4.25cm]{551.png}
+\end{center}
 
 To evaluate the impact of block packing on performance, we assessed two dependent parameters, tree size and data throughput. For both tests, we wrote 1000 files of the same size to the ORAM and then recorded the throughput of reading the files 1000 times. Automatic resizing was turned on in order to illustrate the space saving aspect of this optimization. The file sizes of 16, 32 and 70 KB were chosen specifically for this test. Without block packing, the size of the tree was expected to be the same for both the 16 KB files and the 32 KB files because each file will take up one block, and with block packing, the size was expected to be $1/4$ and $1/2$ of the previous sizes because 4 times and 2 times as many files can be packed together in a block, respectively. The results confirm our expectations. The 70 KB file was chosen to illustrate that block packing works with the leftover segments. As shown in the graph, the tree was about two times smaller, because the extra 6 KB file segments were packed together, saving space. Block packing also yielded a small improvement in data throughput. The saved space results in a smaller tree structure. As a result the time taken for a path read/write is expected to be somewhat shorter.
 
 \subsection{Dynamic Growing and Shrinking}
-graph
+\begin{center}
+\noindent\includegraphics[width=8.5cm]{560.png}
+\end{center}
 
 To demonstrate the implementation of our dynamic tree structure, we tested the impact of random file addition or deletion to the tree structure. Thirty-two actions were performed using files of random sizes for this demonstration. Figure 5-6 displays the impact of an increasing and decreasing total file size stored in the tree. Whenever the tree utilization breaks the threshold set at $0.45$ or $0.55$, the tree to resizes to fulfill the target 50\% utilization.
 
