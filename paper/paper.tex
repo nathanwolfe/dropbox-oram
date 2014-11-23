@@ -117,8 +117,9 @@ To make the Oblivious RAM system more efficient, researchers introduced Path ORA
 
 \begin{figure}
 \begin{center}
-    \includegraphics[width=6cm]{220.png}
-  \caption{Example of binary tree with blocks of data}
+  \includegraphics[width=6cm]{220.png}
+  \caption{Example of binary tree with blocks of data. \textcolor{red}{put the
+  whole ORAM architecture here.}}
   \label{fig:bintree}
 \end{center}
 \end{figure}
@@ -139,9 +140,13 @@ We introduce the general organization of our design and several changes to the b
 
 \subsection{Big Picture}
 
+\begin{figure}
 \begin{center}
-\noindent\includegraphics[width=8.5cm]{310.png}
+  \noindent\includegraphics[width=8.5cm]{310.png}
+  \caption{\textcolor{red}{should have a caption}}
+  \label{fig:bigpic}
 \end{center}
+\end{figure}
 
 The overall interface of our design consists of three parts: the client, the Path ORAM implementation and Dropbox. Instead of the client directly writing and reading files to the Dropbox folder, we implemented the ORAM as an intermediary controller between the two. So a user will directly interact with the User File System (See Section 3.2), which in turn interacts with the ORAM controller to read and write files. The ORAM controller interacts with Dropbox by having the buckets of the tree written to the Dropbox folder. The Dropbox service will then sync the contents to the cloud. When reading a file, the bucket files are downloaded. As we will discuss in Section 3.3, a system with multiple computers accessing the same files requires the stash, position map, and other dictionaries to be written to Dropbox as well, which can be downloaded by other computers in the system. These structures which are normally kept in secure storage have to be encrypted with a secret key.
 
