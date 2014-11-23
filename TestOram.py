@@ -265,9 +265,9 @@ def TestMultiBlock():
 
 def TestBlockPack(testFile):
     #random.seed(5)
-    numTests = 1000
+    numTests = 100
     totalSize = 0
-    oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)            # change segSize, and write appropriate file
+    oram = UserFileSys.UserFileSys(201, 3, 65536, 100, 1.8, 2.0, 2.2, 1)            # change segSize, and write appropriate file
     for i in range(0, numTests):
         shutil.copyfile(testFile, testFile + "_" + str(i) + ".txt")
         totalSize += int(testFile[14:testFile.index(".")])
@@ -282,17 +282,9 @@ def TestBlockPack(testFile):
     print("Without Block Packing: " + str(oram._oram._tree.getSize()) + "  " + str(totalSize/timeTaken))
 
 
-    oram = UserFileSys.UserFileSys(101, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
+    oram = UserFileSys.UserFileSys(201, 3, 65536, 100, 1.8, 2.0, 2.2, 1)
     oram.blockPack = True
-<<<<<<< HEAD
-    for i in range(2, numTests):
-        oram.write("2014_Science_Fair - Copy (" + str(i) + ").jpg")
-        oram.read("2014_Science_Fair - Copy (" + str(i) + ").jpg")
-    print(oram._oram._tree.getSize())
-    print(oram._oram._stash.getSize())
-    
 
-=======
     for i in range(0, numTests):
         oram.write(testFile + "_" + str(i) + ".txt")
     start = time.clock()
@@ -352,7 +344,7 @@ def getFile():     # returns name of file based on distribution graph
     probTable = [0.0, 0.5, 0.6, 0.8, 0.9, 0.92, 0.95, 0.97, 0.98, 0.99, 0.995, 1.0]
     for i in range(len(probTable)-1):
         if prob	>= probTable[i] and prob < probTable[i+1]:
-            return ("testFiles/test" + str(4 << i) + ".txt")
+            return ("TestFiles/test" + str(4 << i) + ".txt")
 
 def TestVCache():
     oram = UserFileSys.UserFileSys(101, 3, 4096, 100, 1.8, 2.0, 2.2, 1)
@@ -393,8 +385,8 @@ def PlotGS():
 # print()
 # TestMultiBlock()
 # print()
-# TestBlockPack("TestFiles/test16.txt")
+TestBlockPack("TestFiles/test16.txt")
 # TestBlockPack("TestFiles/test32.txt")
 # TestBlockPack("TestFiles/test70.txt")
 #TestGrowShrink("overhead")
-PlotGS()
+#PlotGS()
