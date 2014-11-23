@@ -358,13 +358,21 @@
 % author names and affiliations
 % use a multiple column layout for up to three different
 % affiliations
-\author{\IEEEauthorblockN{Ethan Zou}
+
+\author{\IEEEauthorblockN{Nathan Wolfe}
+\IEEEauthorblockA{The Roxbury Latin School\\ West Roxbury, MA\\
+Email: nathanwolferl@gmail.com}
+\and
+\IEEEauthorblockN{Ethan Zou}
 \IEEEauthorblockA{Lexington High School\\ Lexington, MA \\
 Email: zouethan19@gmail.com}
 \and
-\IEEEauthorblockN{Nathan Wolfe}
-\IEEEauthorblockA{The Roxbury Latin School\\ West Roxbury, MA\\
-Email: nathanwolferl@gmail.com}}
+\IEEEauthorblockN{Ling Ren}
+\IEEEauthorblockA{MIT}
+\and
+\IEEEauthorblockN{Xiangyao Yu}
+\IEEEauthorblockA{MIT}
+}
 
 % conference papers do not typically use \thanks and this command
 % is locked out in conference mode. If really needed, such as for
@@ -479,10 +487,11 @@ We introduce the general organization of our design and several changes to the b
 \noindent\includegraphics[width=8.5cm]{310.png}
 \end{center}
 
-The overall interface of our design consists of three parts: the client, the Path ORAM implementation and Dropbox. Instead of the client directly writing and reading files to the Dropbox folder, we implemented the ORAM as an intermediary controller between the two. So a user will directly interact with the User File System (See Section 3.2), which in turn interacts with the ORAM controller to read and write files. The ORAM controller interacts with Dropbox by having the buckets of the tree written to the Dropbox folder. The Dropbox service will then sync the contents to the cloud. When reading a file, the bucket files are downloaded. As we will discuss in Section 3.3, a system with multiple computers accessing the same files requires the stash, position map, and other dictionaries to be written to Dropbox as well, which can be downloaded by other computers in the system. These structures which are normally kept in secure storage have to be encrypted with a secret key.
+The overall interface of our design consists of three parts: the client, the Path ORAM implementation and Dropbox. Instead of the client directly writing and reading files to the Dropbox folder, we implemented the ORAM as an intermediary controller between the two. So a user will directly interact with the User File System (See \ref{sec:UFS}), which in turn interacts with the ORAM controller to read and write files. The ORAM controller interacts with Dropbox by having the buckets of the tree written to the Dropbox folder. The Dropbox service will then sync the contents to the cloud. When reading a file, the bucket files are downloaded. As we will discuss in \ref{sec:MultiComp}, a system with multiple computers accessing the same files requires the stash, position map, and other dictionaries to be written to Dropbox as well, which can be downloaded by other computers in the system. These structures which are normally kept in secure storage have to be encrypted with a secret key.
 
 \subsection{User File System}
 
+\label{sec:UFS}
 Dropbox's baseline functions allow users to read and write files to a remote server in the cloud. Thus, we needed a way for our ORAM system to support the reading and writing of files of various sizes. Our solution was implementing the User File System, which enables the writing of files of different sizes. 
 
 The User File System interacts with the ORAM controller and provides the users with an interface to read, update and delete files of arbitrary size. The User File System consists of several dictionaries which hold vital metadata. Its main feature is to partition files into chunks, whose size is a parameter we call {\bf segment size}. These chunks are then each written to or read from the ORAM.
@@ -495,6 +504,7 @@ To write a file, we split it up into subfiles each containing a number of bytes 
 
 \subsection{Multi-Computer}
 
+\label{sec:MultiComp}
 One of the major reasons cloud storage programs such as Dropbox are so popular is that a user can access and change files on one computer, and then move to another computer to access the same files. In order to support this feature, we added functionalities to the file systems.
 
 When a user “logs off” from the computer, the dictionaries in the User File System, the position map, and the stash are written to the Dropbox folder, and then synced to the remote server. An important implication is that these files are encrypted and padded to a constant file size when written to Dropbox to ensure security and prevent an adversary from gaining information from file size or access pattern. When the user wants to access his files from another computer, he/she downloads these files from the server to reconstruct the User File System and ORAM metadata structures.
@@ -516,7 +526,7 @@ One idea to improve performance dramatically is to fetch multiple data blocks in
 
 One way to speed up the ORAM operations is to cut down on the number of partitions of a file. In order to do that, we need to use a large segment size. However, larger segment sizes hurt small files because a tremendous amount of space is wasted, and it takes longer to read small files. 
 
-With this in mind, our approach to improving this aspect of the ORAM was to implement block packing, which essentially packs more than one file segment together into one block. The motivation behind this approach comes from the idea that a small file does not necessarily need to be the only file present in a block. Additionally, leftover data that does not divide evenly into the segment size can also be packed into the empty spaces of a block. By doing this, space is saved and not wasted, resulting in a smaller tree and smaller path lengths (see Section 4.4), and consequently reduces file access time (though only slightly).
+With this in mind, our approach to improving this aspect of the ORAM was to implement block packing, which essentially packs more than one file segment together into one block. The motivation behind this approach comes from the idea that a small file does not necessarily need to be the only file present in a block. Additionally, leftover data that does not divide evenly into the segment size can also be packed into the empty spaces of a block. By doing this, space is saved and not wasted, resulting in a smaller tree and smaller path lengths (see \ref{sec:growshrink}), and consequently reduces file access time (though only slightly).
 
 Block packing works as follows. We add two more dictionaries to the User File System: one holds the amount of space left in a block and the other holds the start and end offsets of a certain file segment inside of a block. We write a file of an arbitrary size. The “full” segments of data (take up an entire block) are written normally to the ORAM. We then look for available space in a block for the very last segment (which, in the case of a small file will be the entire file). If we find a block that already has some data in it and that has sufficient excess space, we append the final segment to the end of the already existing data, and update the dictionaries accordingly. If we do not find an available block, we write the data to an empty block and add the ID of that block to the dictionary with its amount of empty space. When we want to read the file, all the segments except the last are read normally. We find the position of the last segment in the block and read out the specific portion of the data.
 
@@ -524,6 +534,7 @@ Deleting a file becomes slightly more complicated. All file segments except the 
 
 \subsection{Dynamic Growing and Shrinking Tree}
 
+\label{sec:growshrink}
 A normal ORAM implementation involves a storage space that is fixed in size (e.g., main memory or hard drive of a computer). However, Dropbox presents the unique problem of a dynamically sized storage space. First, users may wish to store sensitive files in an ORAM system alongside less important files stored unencrypted in Dropbox. By supporting resizing of the tree we support this usage scenario. Second, Dropbox allows users to increase the size of their storage by either paying or sharing the service with friends. By supporting tree resizing we allow users to change their storage space without having to create a new ORAM library each time. Thus, resizing provides convenience to the user in a way unique to this project.
 
 The first problem we encounter is to determine when to resize. Previous work suggested that the optimal utilization (meaning the fraction data block slots that are used) is around 50\% \cite{oram-isca13}.
@@ -697,17 +708,6 @@ To summarize our work, we first designed and implemented a Path ORAM system to w
 
 
 % conference papers do not normally have an appendix
-
-
-% use section* for acknowledgement
-\section*{Acknowledgment}
-
-
-(Third person???) The authors would like to thank mentors Ling Ren and Xiangyao Yu for their guidance and insight, and professor Srini Devadas for suggesting the project and encouraging them along the way. They would also like to thank the MIT PRIMES program for making this research possible.
-
-
-
-
 
 % trigger a \newpage just before the given reference
 % number - used to balance the columns on the last page
