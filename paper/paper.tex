@@ -95,7 +95,7 @@
 % \ifCLASSINFOpdf conditional that works the same way.
 % When switching from latex to pdflatex and vice-versa, the compiler may
 % have to be run twice to clear warning/error messages.
-
+\usepackage{tabularx}
 
 
 
@@ -556,10 +556,14 @@ For all the experiments except the one in Section 5.5, we utilize a distribution
 We performed a sweep study to evaluate the optimal segment size into which files are partitioned for storage. The sweep study shows that optimal segment size is 64 KB. It is not surprising that there is an optimal segment size. For small segment sizes, large files are handled inefficiently because they gets partitioned into many more pieces, resulting in a massive number of operations to read/write one file. For large segment sizes, small files take longer to read because of the majority of filler data in a block.
 
 \subsection{Initial ORAM Efficiency}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash}p{#1}}
 \begin{center}
-\noindent\begin{tabular}{ l c r}
+\noindent\begin{tabular}{| C{2.5cm} | C{2.5cm} | C{2.5cm} |}
+  \hline
   \bf{Disk} & \bf{Disk + Encryption} & \bf{Disk + ORAM} \\
+  \hline
   42.13 & 24.42 & 0.66 \\
+  \hline
 \end{tabular}
 \end{center}
 
