@@ -20,11 +20,11 @@
 % affiliations
 
 \author{\IEEEauthorblockN{Nathan Wolfe}
-\IEEEauthorblockA{The Roxbury Latin School\\ West Roxbury, MA\\
+\IEEEauthorblockA{The Roxbury Latin School\\ 
 Email: nathanwolferl@gmail.com}
 \and
 \IEEEauthorblockN{Ethan Zou}
-\IEEEauthorblockA{Lexington High School\\ Lexington, MA \\
+\IEEEauthorblockA{Lexington High School\\ 
 Email: zouethan19@gmail.com}
 \and
 \IEEEauthorblockN{Ling Ren}
@@ -108,20 +108,38 @@ For most users, Dropbox presents adequate security; all files are encrypted when
 
 Previous works have shown the importance in protecting access pattern. Memory access patterns can leak information such as a program’s control flow, which concerns conditional branches of the program and the order of commands executed \cite{HIDE}. Also, M.S. Islam et al. have shown how, from an encrypted email repository, adversaries can infer 80\% of search queries simply from access patterns \cite{Islam12}.
 
-Oblivious RAM (ORAM) is designed specifically to obfuscate what files in a database are being edited. This obfuscation of the user’s access pattern provides a critical additional layer of security. Thus, in our research project we have implemented an ORAM system for use with Dropbox. Along the way, we have discovered various innovations and optimizations that are unique to the Dropbox usage scenario. First, we have designed a system where ORAM on Dropbox can be used between multiple user computers. We also propose the optimizations of multi-block fetching, which improves performance by 51.9\%, and block packing, which saves 50-70\% storage overhead. Finally, we propose a dynamically growing and shrinking tree, providing us with the necessary storage size flexibility to work with Dropbox.
+Oblivious RAM (ORAM) is a cryptographic primitive that completely eliminates the information leakage in memory access pattern.
+In ORAM schemes, a client stores its data in encrypted and shuffled form on an untrusted server.
+On each access, the client reads the untrusted memory, reshuffles that memory and possibly updates some state in trusted local storage called \emph{the client storage}.
+Under ORAM, any memory access pattern is computationally indistinguishable from any other access pattern of the same length.
 
-In this paper, we will first provide some background on ORAM. We will then explain the system architecture behind our ORAM implementation. Then, after explaining our various optimizations and improvements to the base system, we will present some evaluations performed on the system to validate its effectiveness and assess its performance.
+Since the initial ORAM proposal by Goldreich and Ostrovsky \cite{G87, O90, GO96}, researchers have strived to improve the efficiency and reduce the trusted storage requirement of ORAM \cite{OS97, WS08, BMP11, WS12, GM11, GMOT12, Kush12, SSS12, SCSL11, GENTRY13, PathORAM} for three decade. 
+Of particular interests among them is Path ORAM \cite{PathORAM}.
+Path ORAM’s bandwidth and client storage are both logarithmic in its capacity.
+Furthermore, it is extremely simple and suitable for real world implementation. 
+Immediately after its proposal in 2012, Path ORAM gained popularity in many applications due to its simplicity and efficiency. 
+
+In this work, we adapted Path ORAM for use with oblivious cloud storage, and propose several optimizations specific to the cloud storage setting.
+First, we have designed a system where ORAM on Dropbox can be used between multiple user computers. 
+We also propose the optimizations of multi-block fetching, which improves performance by 51.9\%, and block packing, which saves 50-70\% storage overhead. 
+Finally, we propose a dynamically growing and shrinking tree, providing the necessary storage size flexibility to work with Dropbox.
 
 
-\section{Background}
+Previous oblivious storage works include PrivateFS \cite{PrivateFS}, Shroud \cite{Shroud} and ObliviStore \cite{oblivistore}.
+ObliviStore, which is based on the SSS ORAM \cite{SSS12} with careful engineering claims the best memory throughput.
+A recent work named Burst ORAM \cite{BurstORAM}, built on top of ObliviStore, optimizes response time instead of throughput.
+We remark that the goal of this paper is not to claim superiority of Path ORAM over ObliviStore or Burst ORAM.
+Rather, the ideas in this paper apply to those constructions as well, and we simply choose Path ORAM to evaluate our proposal due to its conceptual simplicity. 
 
-\subsection{Oblivious RAM}
-First, what is ORAM? Imagine that you have a table with papers lying on it in a common room at your office building. Occasionally you want to read or write on these papers. The problem is that your coworkers can see when you read or write on a sheet, when you really want to keep which one you are working on a secret. One good option to hide which you are working on is to take all of the papers into your private office, do what you want, and then bring them all back out to the table again. This is what we call naive Oblivious RAM (ORAM). Your coworkers are analogous to adversaries, the table outside is untrusted storage, and your own office is trusted. The sheets of paper represent blocks of data, and working on a sheet is analogous to accessing it, that is, reading or editing it. The point of the system we just described, and of any ORAM system, is to hide your access pattern: which sheet you are working on. This naive system works well to achieve this goal, but is obviously very inefficient. (Why even keep the papers outside if you bring them into your own room all the time anyway?)
+\textbf{Organization.} 
+We will first provide some background on Path ORAM in Section \textcolor{red}{add section label and reference}. We will then explain the system architecture behind our ORAM implementation in Section \textcolor{red}{3}. Then, after explaining our various optimizations and improvements in Section \textcolor{red}{4}, we will present some evaluations results in Section \textcolor{red}{5}.
 
-In the past three decades, researchers have strived to improve the efficiency and reduce the trusted storage requirement of ORAM \cite{G87, GM11, O90, SCSL11, SSS12}. A breakthrough in implementation is achieved through Path ORAM \cite{PathORAM}. Path ORAM’s performance and trusted storage requirement are both logarithmic in its capacity. Furthermore, its algorithm is extremely simple and suitable for real world implementation. Immediately after its proposal in 2012, Path ORAM gained popularity in many applications due to its simplicity and efficiency. In this work, we adapted it for use with Dropbox.
 
-\subsection{Path Oblivious RAM}
-To make the Oblivious RAM system more efficient, researchers introduced Path ORAM. In this system, blocks of data are arranged into a binary tree, with a few blocks at each node of the tree. (A binary tree, pictured in {\bf Figure \ref{fig:bintree}}, is a tree in which each node has up to two children.) Instead of accessing all blocks in order to keep a specific one secret, we can simply access all blocks along the target’s path. “Accessing” in this context means fetching a block from untrusted storage and placing it in memory to be worked on. Work on a specific block is still hidden because a group of blocks are accessed together, but the groups are much smaller, improving speed. 
+\section{Background on Path ORAM}
+
+In Path ORAM, data blocks are arranged into a binary tree, with up to a constant number blocks at each node of the tree (Figure \ref{fig:bintree}). 
+Each block is mapped to random path of the tree.
+To access a block, the Path ORAM algorithm accesses all blocks along the target’s path. 
 
 \begin{figure}
 \begin{center}
@@ -132,7 +150,11 @@ To make the Oblivious RAM system more efficient, researchers introduced Path ORA
 \end{center}
 \end{figure}
 
-We summarize how Path ORAM works in {\bf Figure \ref{fig:bintree}}. The reader can refer to \cite{PathORAM} for more details. The tree is a binary tree data structure of height $L$ and $2^L$ leaves stored on the server as a one-dimensional array. The levels are numbered 0 to $L$, where level 0 is the root, level $L$ contains the leaves (in a complete tree), and levels in between contain non-leaf nodes. Each node in the binary tree is called a bucket, and contains $z$ blocks. If a bucket contains less than $z$ “real” blocks, the remainder are composed of dummy blocks, which are indistinguishable from real blocks because buckets are stored as encrypted fixed-size arrays.
+We summarize how Path ORAM works in {\bf Figure \ref{fig:bintree}}. The reader can refer to \cite{PathORAM} for more details. The binary tree is stored on the server. 
+Suppose it has height $L$ and $2^L$ leaves. 
+The levels are numbered 0 to $L$, where level 0 is the root and level $L$ contains the leaves (in a complete tree). 
+Each node in the binary tree is called a bucket, and contains $z$ blocks. 
+If a bucket contains less than $z$ “real” blocks, the remainder are composed of dummy blocks, which are indistinguishable from real blocks after encryption.
 
 On the client side, we construct a data structure called the {\bf stash}, which stores a small subset of the data blocks, and a {\bf position map} that assigns each block to a path in the tree. Every path is uniquely defined as leading from the root to one of the $2^L$ leaf buckets. Importantly, mapping is random, allowing for multiple unrelated blocks to be mapped to one leaf. This is shown in {\bf Figure \ref{fig:bintree}}: for example, both blocks B and E are mapped to leaf 1, and are required to reside on the path defined by this leaf (referred to as path 1). The position map is updated as blocks are accessed and their leaf assignments changed. This is critical because Path ORAM maintains the invariant that if the block is not on its assigned path, it is in the stash (if it is not, there is a bug).
 
