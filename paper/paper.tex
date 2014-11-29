@@ -132,11 +132,12 @@ We remark that the goal of this paper is not to claim superiority of Path ORAM o
 Rather, the ideas in this paper apply to those constructions as well, and we simply choose Path ORAM to evaluate our proposal due to its conceptual simplicity. 
 
 \textbf{Organization.} 
-We will first provide some background on Path ORAM in Section \textcolor{red}{add section label and reference}. We will then explain the system architecture behind our ORAM implementation in Section \textcolor{red}{3}. Then, after explaining our various optimizations and improvements in Section \textcolor{red}{4}, we will present some evaluations results in Section \textcolor{red}{5}.
+We will first provide some background on Path ORAM in Section \ref{sec:Background}. We will then explain the system architecture behind our ORAM implementation in Section \ref{sec:SysArch}. Then, after explaining our various optimizations and improvements in Section \ref{sec:Opt}, we will present some evaluations results in Section \label{sec:Eval}.
 
 
 \section{Background on Path ORAM}
 
+\label{sec:Background}
 In Path ORAM, data blocks are arranged into a binary tree, with up to a constant number blocks at each node of the tree (Figure \ref{fig:bintree}). 
 Each block is mapped to random path of the tree.
 To access a block, the Path ORAM algorithm accesses all blocks along the target’s path. 
@@ -165,6 +166,7 @@ In the past many papers have focused on Path ORAM systems and their optimization
 
 \section{System Architecture}
 
+\label{sec:SysArch}
 We introduce the general organization of our design and several changes to the basic implementation to better suit Dropbox.
 
 \subsection{Big Picture}
@@ -177,7 +179,7 @@ We introduce the general organization of our design and several changes to the b
 \end{center}
 \end{figure}
 
-The overall interface of our design consists of three parts: the client, the Path ORAM implementation and Dropbox. Instead of the client directly writing and reading files to the Dropbox folder, we implemented the ORAM as an intermediary controller between the two. So a user will directly interact with the User File System (See \ref{sec:UFS}), which in turn interacts with the ORAM controller to read and write files. The ORAM controller interacts with Dropbox by having the buckets of the tree written to the Dropbox folder. The Dropbox service will then sync the contents to the cloud. When reading a file, the bucket files are downloaded. As we will discuss in \ref{sec:MultiComp}, a system with multiple computers accessing the same files requires the stash, position map, and other dictionaries to be written to Dropbox as well, which can be downloaded by other computers in the system. These structures which are normally kept in secure storage have to be encrypted with a secret key.
+The overall interface of our design consists of three parts: the client, the Path ORAM implementation and Dropbox. Instead of the client directly writing and reading files to the Dropbox folder, we implemented the ORAM as an intermediary controller between the two. So a user will directly interact with the User File System (See Section \ref{sec:UFS}), which in turn interacts with the ORAM controller to read and write files. The ORAM controller interacts with Dropbox by having the buckets of the tree written to the Dropbox folder. The Dropbox service will then sync the contents to the cloud. When reading a file, the bucket files are downloaded. As we will discuss in Section \ref{sec:MultiComp}, a system with multiple computers accessing the same files requires the stash, position map, and other dictionaries to be written to Dropbox as well, which can be downloaded by other computers in the system. These structures which are normally kept in secure storage have to be encrypted with a secret key.
 
 \subsection{User File System}
 
@@ -210,6 +212,8 @@ Our current implementation is significantly slower than directly using Dropbox w
 
 \section{Optimizations}
 
+\label{sec:Opt}
+
 In this section we provide detailed explanations and motivation for the new optimizations we have implemented: multi-block fetching, block packing and a dynamically growing and shrinking tree size.
 
 \subsection{Multi-Block Fetching}
@@ -218,9 +222,10 @@ One idea to improve performance dramatically is to fetch multiple data blocks in
 
 \subsection{Block Packing}
 
+\label{sec:mult-blkOpt}
 One way to speed up the ORAM operations is to cut down on the number of partitions of a file. In order to do that, we need to use a large segment size. However, larger segment sizes hurt small files because a tremendous amount of space is wasted, and it takes longer to read small files. 
 
-With this in mind, our approach to improving this aspect of the ORAM was to implement block packing, which essentially packs more than one file segment together into one block. The motivation behind this approach comes from the idea that a small file does not necessarily need to be the only file present in a block. Additionally, leftover data that does not divide evenly into the segment size can also be packed into the empty spaces of a block. By doing this, space is saved and not wasted, resulting in a smaller tree and smaller path lengths (see \ref{sec:growshrink}), and consequently reduces file access time (though only slightly).
+With this in mind, our approach to improving this aspect of the ORAM was to implement block packing, which essentially packs more than one file segment together into one block. The motivation behind this approach comes from the idea that a small file does not necessarily need to be the only file present in a block. Additionally, leftover data that does not divide evenly into the segment size can also be packed into the empty spaces of a block. By doing this, space is saved and not wasted, resulting in a smaller tree and smaller path lengths (see Section \ref{sec:growshrink}), and consequently reduces file access time (though only slightly).
 
 Block packing works as follows. We add two more dictionaries to the User File System: one holds the amount of space left in a block and the other holds the start and end offsets of a certain file segment inside of a block. We write a file of an arbitrary size. The “full” segments of data (take up an entire block) are written normally to the ORAM. We then look for available space in a block for the very last segment (which, in the case of a small file will be the entire file). If we find a block that already has some data in it and that has sufficient excess space, we append the final segment to the end of the already existing data, and update the dictionaries accordingly. If we do not find an available block, we write the data to an empty block and add the ID of that block to the dictionary with its amount of empty space. When we want to read the file, all the segments except the last are read normally. We find the position of the last segment in the block and read out the specific portion of the data.
 
@@ -240,6 +245,8 @@ Growing the tree works as follows. First, we add the correct number of buckets t
 Shrinking works similarly; first we remove the correct number of buckets from the leaf end of the tree, dumping their contents into the stash. Again, this leaks the information that our total file size must have decreased. We then correct all leaves in the position map and the stash by truncating the path so that it lines up with the correct leaf, and leave the ones in the tree to sort out later.
 
 \section{Evaluations}
+
+\label{sec:Eval}
 In this section, we evaluate the performance of our optimizations. 
 \subsection{Methodology}
 
@@ -247,7 +254,7 @@ The CPU Model of the machine used for the experiments is Intel(R) Core\textsuper
 
 For all experiments, the parameters were kept at constant values (unless we were testing that parameter). The ORAM tree size (if auto resizing is off) was dependent on the amount of data written to it, twice the total file size. Segment size was 64 KB (optimal as indicated by {\bf Figure \ref{fig:segsize}}) with bucket sizes of z = 3.  The maximum stash size was 100. The utilization ratio that triggers tree growth was 0.45 and for tree shrinkage 0.55. We use throughput as the performance metric, which is a measurement of how fast files can be read from and written to our ORAM-enabled Dropbox. It is expressed in bits per second or multiples of it. For our experiments we use megabytes per second (MB/s).
 
-For all the experiments except the one in {\bf Section}, we utilize a distribution of files of various sizes to better simulate the contents/actions of a “real” file system, by reading/writing 1000 files based upon this cumulative distribution. This file distribution was chosen from previous work done on file system workloads \cite{roselli2000comparison}, and is reproduced in {\bf Figure \ref{fig:distfun}}.
+For all the experiments except the one in Section \ref{sec:BlkPack}, we utilize a distribution of files of various sizes to better simulate the contents/actions of a “real” file system, by reading/writing 1000 files based upon this cumulative distribution. This file distribution was chosen from previous work done on file system workloads \cite{roselli2000comparison}, and is reproduced in {\bf Figure \ref{fig:distfun}}.
 
 \begin{figure}
 \begin{center}
@@ -266,7 +273,7 @@ For all the experiments except the one in {\bf Section}, we utilize a distributi
 \end{center}
 \end{figure}
 
-We performed a sweep study to evaluate the optimal segment size into which files are partitioned for storage. The sweep study shows that optimal segment size is 64 KB. It is not surprising that there is an optimal segment size. For small segment sizes, large files are handled inefficiently because they gets partitioned into many more pieces, resulting in a massive number of operations to read/write one file. For large segment sizes, small files take longer to read because of the majority of filler data in a block.
+We performed a sweep study to evaluate the optimal segment size into which files are partitioned for storage. The sweep study in {\bf Figure \ref{fig:segsize}} shows that optimal segment size is 64 KB. It is not surprising that there is an optimal segment size. For small segment sizes, large files are handled inefficiently because they gets partitioned into many more pieces, resulting in a massive number of operations to read/write one file. For large segment sizes, small files take longer to read because of the majority of filler data in a block.
 
 \subsection{Initial ORAM Efficiency}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash}p{#1}}
@@ -284,7 +291,7 @@ We performed a sweep study to evaluate the optimal segment size into which files
 \end{center}
 \end{figure}
 
-We evaluated the overhead cost of implementing of Path ORAM with that of encryption alone. As a baseline we compared this to reading/writing files to the local disk.  Encryption added a little overhead (about 1.7 times slower) to the operations. Incorporating ORAM made the operations an additional 37 times slower when compared to encryption alone. As indicated by the table, the performance of our Dropbox-ORAM implementation without any optimizations is very slow, as expected. The remainder of this section evaluates the effectiveness of our improvements.
+We evaluated the overhead cost of implementing of Path ORAM with that of encryption alone. As a baseline we compared this to reading/writing files to the local disk (Shown in {\bf Figure \ref{tab:baseline}}).  Encryption added a little overhead (about 1.7 times slower) to the operations. Incorporating ORAM made the operations an additional 37 times slower when compared to encryption alone. As indicated by the table, the performance of our Dropbox-ORAM implementation without any optimizations is very slow, as expected. The remainder of this section evaluates the effectiveness of our improvements.
 
 \subsection{Multi-Block Fetching}
 \begin{figure}
@@ -295,9 +302,11 @@ We evaluated the overhead cost of implementing of Path ORAM with that of encrypt
 \end{center}
 \end{figure}
 
-As noted in Section 4.1, we utilized multi-block fetching with segment grouping to improve the efficiency of our tree architecture. From the graph we can see that the optimal grouping size appears to be 3, which also indicates that multiple block fetching does improve performance. However, larger grouping sizes create more congestion in some paths. To compensate for congestion, a technique called background eviction has to be employed, which takes additional overhead \cite{oram-isca13, Yu14DSB}.
+As noted in Section \ref{sec:mult-blkOpt}, we utilized multi-block fetching with segment grouping to improve the efficiency of our tree architecture. From {\bf Figure \ref{fig:multiblock}} we can see that the optimal grouping size appears to be 3, which also indicates that multiple block fetching does improve performance. However, larger grouping sizes create more congestion in some paths. To compensate for congestion, a technique called background eviction has to be employed, which takes additional overhead \cite{oram-isca13, Yu14DSB}.
 
 \subsection{Block Packing}
+
+\label{sec:BlkPack}
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=4cm]{550.pdf}\includegraphics[width=4cm]{551.pdf}
@@ -306,9 +315,9 @@ As noted in Section 4.1, we utilized multi-block fetching with segment grouping 
 \end{center}
 \end{figure}
 
-To evaluate the impact of block packing on performance, we assessed two dependent parameters, tree size and data throughput. For both tests, we wrote 1000 files of the same size to the ORAM and then recorded the throughput of reading the files 1000 times. Automatic resizing was turned on in order to illustrate the space saving aspect of this optimization. The file sizes of 16, 32 and 70 KB were chosen specifically for this test. Without block packing, the size of the tree was expected to be the same for both the 16 KB files and the 32 KB files because each file will take up one block, and with block packing, the size was expected to be $1/4$ and $1/2$ of the previous sizes because 4 times and 2 times as many files can be packed together in a block, respectively. The results confirm our expectations. The 70 KB file was chosen to illustrate that block packing works with the leftover segments. As shown in the graph, the tree was about two times smaller, because the extra 6 KB file segments were packed together, saving space. Block packing also yielded a small improvement in data throughput. The saved space results in a smaller tree structure. As a result the time taken for a path read/write is expected to be somewhat shorter.
+To evaluate the impact of block packing on performance, we assessed two dependent parameters, tree size and data throughput. For both tests, we wrote 1000 files of the same size to the ORAM and then recorded the throughput of reading the files 1000 times. Automatic resizing was turned on in order to illustrate the space saving aspect of this optimization. The file sizes of 16, 32 and 70 KB were chosen specifically for this test. Without block packing, the size of the tree was expected to be the same for both the 16 KB files and the 32 KB files because each file will take up one block, and with block packing, the size was expected to be $1/4$ and $1/2$ of the previous sizes because 4 times and 2 times as many files can be packed together in a block, respectively. The results in {\bf Figure \ref{fig:blockpack}} confirm our expectations. The 70 KB file was chosen to illustrate that block packing works with the leftover segments. As shown in the graph, the tree was about two times smaller, because the extra 6 KB file segments were packed together, saving space. Block packing also yielded a small improvement in data throughput. The saved space results in a smaller tree structure. As a result the time taken for a path read/write is expected to be somewhat shorter.
 
-We tested this optimization only in tandem with dynamic growing and shrinking. The reason for this was that the main goal of block packing is to save space, and so the only way a user will benefit is if the tree shrinks to a smaller size accordingly. The reduced tree size made possible by block packing then provides a significant performance increase, seen in {\bf FIGURE}. Without dynamic growing and shrinking, block packing produces a negligible performance increase.
+We tested this optimization only in tandem with dynamic growing and shrinking. The reason for this was that the main goal of block packing is to save space, and so the only way a user will benefit is if the tree shrinks to a smaller size accordingly. The reduced tree size made possible by block packing then provides a significant performance increase, seen in {\bf Figure \ref{fig:blockpack}}. Without dynamic growing and shrinking, block packing produces a negligible performance increase.
 
 \subsection{Dynamic Growing and Shrinking}
 \begin{figure}
@@ -319,7 +328,7 @@ We tested this optimization only in tandem with dynamic growing and shrinking. T
 \end{center}
 \end{figure}
 
-To demonstrate the implementation of our dynamic tree structure, we tested the impact of random file addition or deletion to the tree structure. Thirty-two actions were performed using files of random sizes for this demonstration. Figure 5-6 displays the impact of an increasing and decreasing total file size stored in the tree. Whenever the tree utilization breaks the threshold set at $0.45$ or $0.55$, the tree to resizes to fulfill the target 50\% utilization.
+To demonstrate the implementation of our dynamic tree structure, we tested the impact of random file addition or deletion to the tree structure. Thirty-two actions were performed using files of random sizes for this demonstration. {\bf Figure \ref{fig:resizing}}  displays the impact of an increasing and decreasing total file size stored in the tree. Whenever the tree utilization breaks the threshold set at $0.45$ or $0.55$, the tree to resizes to fulfill the target 50\% utilization.
 
 \subsection{Total Optimization Impact}
 
