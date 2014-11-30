@@ -110,8 +110,8 @@ In ORAM schemes, a client stores its data in encrypted and shuffled form on an u
 On each access, the client reads the untrusted memory, reshuffles that memory and possibly updates some state in trusted local storage called \emph{the client storage}.
 Under ORAM, any memory access pattern is computationally indistinguishable from any other access pattern of the same length.
 
-Since the initial ORAM proposal by Goldreich and Ostrovsky \cite{G87, O90, GO96}, researchers have strived to improve the efficiency and reduce the trusted storage requirement of ORAM \cite{OS97, WS08, BMP11, WS12, GM11, GMOT12, Kush12, SSS12, SCSL11, GENTRY13, PathORAM} for three decade. 
-Of particular interests among them is Path ORAM \cite{PathORAM}.
+Since the initial ORAM proposal by Goldreich and Ostrovsky \cite{G87, O90, GO96}, researchers have striven to improve the efficiency and reduce the trusted storage requirement of ORAM \cite{OS97, WS08, BMP11, WS12, GM11, GMOT12, Kush12, SSS12, SCSL11, GENTRY13, PathORAM} for three decades. 
+Of particular interest among them is Path ORAM \cite{PathORAM}.
 Path ORAM’s bandwidth and client storage are both logarithmic in its capacity.
 Furthermore, it is extremely simple and suitable for real world implementation. 
 Immediately after its proposal in 2012, Path ORAM gained popularity in many applications due to its simplicity and efficiency. 
@@ -129,7 +129,7 @@ We remark that the goal of this paper is not to claim superiority of Path ORAM o
 Rather, the ideas in this paper apply to those constructions as well, and we simply choose Path ORAM to evaluate our proposal due to its conceptual simplicity. 
 
 \textbf{Organization.} 
-We will first provide some background on Path ORAM in Section \ref{sec:Background}. We will then explain the system architecture behind our ORAM implementation in Section \ref{sec:SysArch}. Then, after explaining our various optimizations and improvements in Section \ref{sec:Opt}, we will present some evaluations results in Section \label{sec:Eval}.
+We will first provide some background on Path ORAM in Section \ref{sec:Background}. We will then explain the system architecture behind our ORAM implementation in Section \ref{sec:SysArch}. Then, after explaining our various optimizations and improvements in Section \ref{sec:Opt}, we will present some evaluations results in Section \ref{sec:Eval}.
 
 
 \section{Background on Path ORAM}
@@ -147,13 +147,13 @@ To access a block, the Path ORAM algorithm accesses all blocks along the target�
 \end{center}
 \end{figure}
 
-We summarize how Path ORAM works in {\bf Figure \ref{fig:bintree}}. The reader can refer to \cite{PathORAM} for more details. The binary tree is stored on the server. 
+We summarize how Path ORAM works in Figure \ref{fig:bintree}. The reader can refer to \cite{PathORAM} for more details. The binary tree is stored on the server. 
 Suppose it has height $L$ and $2^L$ leaves. 
 The levels are numbered 0 to $L$, where level 0 is the root and level $L$ contains the leaves (in a complete tree). 
 Each node in the binary tree is called a bucket, and contains $z$ blocks. 
 If a bucket contains less than $z$ “real” blocks, the remainder are composed of dummy blocks, which are indistinguishable from real blocks after encryption.
 
-On the client side, we construct a data structure called the {\bf stash}, which stores a small subset of the data blocks, and a {\bf position map} that assigns each block to a path in the tree. Every path is uniquely defined as leading from the root to one of the $2^L$ leaf buckets. Importantly, mapping is random, allowing for multiple unrelated blocks to be mapped to one leaf. This is shown in {\bf Figure \ref{fig:bintree}}: for example, both blocks B and E are mapped to leaf 1, and are required to reside on the path defined by this leaf (referred to as path 1). The position map is updated as blocks are accessed and their leaf assignments changed. This is critical because Path ORAM maintains the invariant that if the block is not on its assigned path, it is in the stash (if it is not, there is a bug).
+On the client side, we construct a data structure called the {\bf stash}, which stores a small subset of the data blocks, and a {\bf position map} that assigns each block to a path in the tree. Every path is uniquely defined as leading from the root to one of the $2^L$ leaf buckets. Importantly, mapping is random, allowing for multiple unrelated blocks to be mapped to one leaf. This is shown in Figure \ref{fig:bintree}: for example, both blocks B and E are mapped to leaf 1, and are required to reside on the path defined by this leaf (referred to as path 1). The position map is updated as blocks are accessed and their leaf assignments changed. This is critical because Path ORAM maintains the invariant that if the block is not on its assigned path, it is in the stash (if it is not, there is a bug).
 
 Reading/writing a block consists of several steps. First, we consult the position map to determine what path the target block is on. Then, we fetch the blocks on that path from the tree. Based on the invariant just mentioned, it should be among those fetched blocks or in the stash. We can then securely access the target block. After making any necessary changes to the block we assign it to a different path using the position map. Finally we take all blocks originally fetched and write them back into the tree.
 
@@ -249,9 +249,9 @@ In this section, we evaluate the performance of our optimizations.
 
 The CPU Model of the machine used for the experiments is Intel(R) Core\textsuperscript{TM} i3-2100 CPU @ 3.10GHz. The disk model is ST31000524AS (7200 RPM). Windows 7 operating system and Python 3.4 were used. Our encryption algorithm was Advanced Encryption Standard (AES) 128-bit in counter (CTR) mode, in the PyCrypto package v2.6.1.
 
-For all experiments, the parameters were kept at constant values (unless we were testing that parameter). The ORAM tree size (if auto resizing is off) was dependent on the amount of data written to it, twice the total file size. Segment size was 64 KB (optimal as indicated by {\bf Figure \ref{fig:segsize}}) with bucket sizes of z = 3.  The maximum stash size was 100. The utilization ratio that triggers tree growth was 0.45 and for tree shrinkage 0.55. We use throughput as the performance metric, which is a measurement of how fast files can be read from and written to our ORAM-enabled Dropbox. It is expressed in bits per second or multiples of it. For our experiments we use megabytes per second (MB/s).
+For all experiments, the parameters were kept at constant values (unless we were testing that parameter). The ORAM tree size (if auto resizing is off) was dependent on the amount of data written to it, twice the total file size. Segment size was 64 KB (optimal as indicated by Figure \ref{fig:segsize}) with bucket sizes of z = 3.  The maximum stash size was 100. The utilization ratio that triggers tree growth was 0.45 and for tree shrinkage 0.55. We use throughput as the performance metric, which is a measurement of how fast files can be read from and written to our ORAM-enabled Dropbox. It is expressed in bits per second or multiples of it. For our experiments we use megabytes per second (MB/s).
 
-For all the experiments except the one in Section \ref{sec:BlkPack}, we utilize a distribution of files of various sizes to better simulate the contents/actions of a “real” file system, by reading/writing 1000 files based upon this cumulative distribution. This file distribution was chosen from previous work done on file system workloads \cite{roselli2000comparison}, and is reproduced in {\bf Figure \ref{fig:distfun}}.
+For all the experiments except the one in Section \ref{sec:BlkPack}, we utilize a distribution of files of various sizes to better simulate the contents/actions of a “real” file system, by reading/writing 1000 files based upon this cumulative distribution. This file distribution was chosen from previous work done on file system workloads \cite{roselli2000comparison}, and is reproduced in Figure \ref{fig:distfun}.
 
 \begin{figure}
 \begin{center}
@@ -270,7 +270,7 @@ For all the experiments except the one in Section \ref{sec:BlkPack}, we utilize 
 \end{center}
 \end{figure}
 
-We performed a sweep study to evaluate the optimal segment size into which files are partitioned for storage. The sweep study in {\bf Figure \ref{fig:segsize}} shows that optimal segment size is 64 KB. It is not surprising that there is an optimal segment size. For small segment sizes, large files are handled inefficiently because they gets partitioned into many more pieces, resulting in a massive number of operations to read/write one file. For large segment sizes, small files take longer to read because of the majority of filler data in a block.
+We performed a sweep study to evaluate the optimal segment size into which files are partitioned for storage. The sweep study in Figure \ref{fig:segsize} shows that optimal segment size is 64 KB. It is not surprising that there is an optimal segment size. For small segment sizes, large files are handled inefficiently because they gets partitioned into many more pieces, resulting in a massive number of operations to read/write one file. For large segment sizes, small files take longer to read because of the majority of filler data in a block.
 
 \subsection{Initial ORAM Efficiency}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash}p{#1}}
@@ -288,7 +288,7 @@ We performed a sweep study to evaluate the optimal segment size into which files
 \end{center}
 \end{figure}
 
-We evaluated the overhead cost of implementing of Path ORAM with that of encryption alone. As a baseline we compared this to reading/writing files to the local disk (Shown in {\bf Figure \ref{tab:baseline}}).  Encryption added a little overhead (about 1.7 times slower) to the operations. Incorporating ORAM made the operations an additional 37 times slower when compared to encryption alone. As indicated by the table, the performance of our Dropbox-ORAM implementation without any optimizations is very slow, as expected. The remainder of this section evaluates the effectiveness of our improvements.
+We evaluated the overhead cost of implementing of Path ORAM with that of encryption alone. As a baseline we compared this to reading/writing files to the local disk (Shown in Figure \ref{tab:baseline}).  Encryption added a little overhead (about 1.7 times slower) to the operations. Incorporating ORAM made the operations an additional 37 times slower when compared to encryption alone. As indicated by the table, the performance of our Dropbox-ORAM implementation without any optimizations is very slow, as expected. The remainder of this section evaluates the effectiveness of our improvements.
 
 \subsection{Multi-Block Fetching}
 \begin{figure}
@@ -299,7 +299,7 @@ We evaluated the overhead cost of implementing of Path ORAM with that of encrypt
 \end{center}
 \end{figure}
 
-As noted in Section \ref{sec:mult-blkOpt}, we utilized multi-block fetching with segment grouping to improve the efficiency of our tree architecture. From {\bf Figure \ref{fig:multiblock}} we can see that the optimal grouping size appears to be 3, which also indicates that multiple block fetching does improve performance. However, larger grouping sizes create more congestion in some paths. To compensate for congestion, a technique called background eviction has to be employed, which takes additional overhead \cite{oram-isca13, Yu14DSB}.
+As noted in Section \ref{sec:mult-blkOpt}, we utilized multi-block fetching with segment grouping to improve the efficiency of our tree architecture. From Figure \ref{fig:multiblock} we can see that the optimal grouping size appears to be 3, which also indicates that multiple block fetching does improve performance. However, larger grouping sizes create more congestion in some paths. To compensate for congestion, a technique called background eviction has to be employed, which takes additional overhead \cite{oram-isca13, Yu14DSB}.
 
 \subsection{Block Packing}
 
@@ -312,9 +312,9 @@ As noted in Section \ref{sec:mult-blkOpt}, we utilized multi-block fetching with
 \end{center}
 \end{figure}
 
-To evaluate the impact of block packing on performance, we assessed two dependent parameters, tree size and data throughput. For both tests, we wrote 1000 files of the same size to the ORAM and then recorded the throughput of reading the files 1000 times. Automatic resizing was turned on in order to illustrate the space saving aspect of this optimization. The file sizes of 16, 32 and 70 KB were chosen specifically for this test. Without block packing, the size of the tree was expected to be the same for both the 16 KB files and the 32 KB files because each file will take up one block, and with block packing, the size was expected to be $1/4$ and $1/2$ of the previous sizes because 4 times and 2 times as many files can be packed together in a block, respectively. The results in {\bf Figure \ref{fig:blockpack}} confirm our expectations. The 70 KB file was chosen to illustrate that block packing works with the leftover segments. As shown in the graph, the tree was about two times smaller, because the extra 6 KB file segments were packed together, saving space. Block packing also yielded a small improvement in data throughput. The saved space results in a smaller tree structure. As a result the time taken for a path read/write is expected to be somewhat shorter.
+To evaluate the impact of block packing on performance, we assessed two dependent parameters, tree size and data throughput. For both tests, we wrote 1000 files of the same size to the ORAM and then recorded the throughput of reading the files 1000 times. Automatic resizing was turned on in order to illustrate the space saving aspect of this optimization. The file sizes of 16, 32 and 70 KB were chosen specifically for this test. Without block packing, the size of the tree was expected to be the same for both the 16 KB files and the 32 KB files because each file will take up one block, and with block packing, the size was expected to be $1/4$ and $1/2$ of the previous sizes because 4 times and 2 times as many files can be packed together in a block, respectively. The results in Figure \ref{fig:blockpack} confirm our expectations. The 70 KB file was chosen to illustrate that block packing works with the leftover segments. As shown in the graph, the tree was about two times smaller, because the extra 6 KB file segments were packed together, saving space. Block packing also yielded a small improvement in data throughput. The saved space results in a smaller tree structure. As a result the time taken for a path read/write is expected to be somewhat shorter.
 
-We tested this optimization only in tandem with dynamic growing and shrinking. The reason for this was that the main goal of block packing is to save space, and so the only way a user will benefit is if the tree shrinks to a smaller size accordingly. The reduced tree size made possible by block packing then provides a significant performance increase, seen in {\bf Figure \ref{fig:blockpack}}. Without dynamic growing and shrinking, block packing produces a negligible performance increase.
+We tested this optimization only in tandem with dynamic growing and shrinking. The reason for this was that the main goal of block packing is to save space, and so the only way a user will benefit is if the tree shrinks to a smaller size accordingly. The reduced tree size made possible by block packing then provides a significant performance increase, seen in Figure \ref{fig:blockpack}. Without dynamic growing and shrinking, block packing produces a negligible performance increase.
 
 \subsection{Dynamic Growing and Shrinking}
 \begin{figure}
@@ -325,7 +325,7 @@ We tested this optimization only in tandem with dynamic growing and shrinking. T
 \end{center}
 \end{figure}
 
-To demonstrate the implementation of our dynamic tree structure, we tested the impact of random file addition or deletion to the tree structure. Thirty-two actions were performed using files of random sizes for this demonstration. {\bf Figure \ref{fig:resizing}}  displays the impact of an increasing and decreasing total file size stored in the tree. Whenever the tree utilization breaks the threshold set at $0.45$ or $0.55$, the tree to resizes to fulfill the target 50\% utilization.
+To demonstrate the implementation of our dynamic tree structure, we tested the impact of random file addition or deletion to the tree structure. Thirty-two actions were performed using files of random sizes for this demonstration. Figure \ref{fig:resizing} displays the impact of an increasing and decreasing total file size stored in the tree. Whenever the tree utilization breaks the threshold set at $0.45$ or $0.55$, the tree to resizes to fulfill the target 50\% utilization.
 
 \subsection{Total Optimization Impact}
 
