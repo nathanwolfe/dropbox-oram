@@ -142,7 +142,7 @@ To access a block, the Path ORAM algorithm accesses all blocks along the targetâ
 \begin{figure}
 \begin{center}
   \includegraphics[width=6cm]{220.pdf}
-  \caption{Example of binary tree with blocks of data.}
+  \caption{An example of a Path ORAM construction consisting of the binary tree (untrusted) and the stash and position map (trusted).}
   \label{fig:bintree}
 \end{center}
 \end{figure}
@@ -188,7 +188,7 @@ The User File System interacts with the ORAM controller and provides the users w
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=8cm]{320.pdf}
-\caption{User File System}
+\caption{Visual representation of how the User File System reads and writes files from and to Dropbox.}
 \label{fig:userfilesys}
 \end{center}
 \end{figure}
@@ -256,7 +256,7 @@ For all the experiments except the one in Section \ref{sec:BlkPack}, we utilize 
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=8.5cm]{510.pdf}
-\caption{File Distribution Function}
+\caption{File Distribution Function showing the cumulative percentage of files of various sizes (KB).}
 \label{fig:distfun}
 \end{center}
 \end{figure}
@@ -265,7 +265,7 @@ For all the experiments except the one in Section \ref{sec:BlkPack}, we utilize 
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=8.5cm]{520.pdf}
-\caption{Segment Size Sweep Study}
+\caption{Sweep study comparing segment size with throughput (in MB/sec)}
 \label{fig:segsize}
 \end{center}
 \end{figure}
@@ -295,7 +295,7 @@ We evaluated the overhead cost of implementing of Path ORAM with that of encrypt
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=8.5cm]{540.pdf}
-\caption{Multi-Block Evaluation}
+\caption{Throughput (in MB/sec) of Path ORAM at different Multi-Block sizes.}
 \label{fig:multiblock}
 \end{center}
 \end{figure}
@@ -308,7 +308,7 @@ As noted in Section \ref{sec:mult-blkOpt}, we utilized multi-block fetching with
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=4.3cm]{550.pdf}\includegraphics[width=4.3cm]{551.pdf}
-\caption{Block Packing Evaluations}
+\caption{Block Packing evaluations comparing tree size (in nodes) and throughput (in MB/sec)  with various file sizes (at segment size of 4 KB.)}
 \label{fig:blockpack}
 \end{center}
 \end{figure}
@@ -321,7 +321,7 @@ We tested this optimization only in tandem with dynamic growing and shrinking. T
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=8.5cm]{560.pdf}
-\caption{Tree Resizing Demonstration}
+\caption{Tree resizing demonstration charting size of tree over time.}
 \label{fig:resizing}
 \end{center}
 \end{figure}
