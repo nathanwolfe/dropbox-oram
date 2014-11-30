@@ -71,10 +71,7 @@ Email: yxy@mit.edu}
 
 \begin{abstract}
 %\boldmath
-We live in a world where our personal data are both valuable and vulnerable to misappropriation through exploitation of security vulnerabilities in online services. For instance, Dropbox, a popular cloud storage tool, has certain security flaws that can be exploited to compromise a user’s data, one of which being that a user's access pattern is unprotected. We have thus created an implementation of Path Oblivious RAM (Path ORAM) for Dropbox users to obfuscate path access information to patch this vulnerability. This implementation differs significantly from the standard usage of Path ORAM, in that we introduce several innovations, including a dynamically growing and shrinking tree architecture, multi-block fetching, block packing and the possibility for multi-client use.
-
-\textcolor{red}{mention the overall performance improvement in the abstact.
-(Performance gain and storage reduction)}
+We live in a world where our personal data are both valuable and vulnerable to misappropriation through exploitation of security vulnerabilities in online services. For instance, Dropbox, a popular cloud storage tool, has certain security flaws that can be exploited to compromise a user’s data, one of which being that a user's access pattern is unprotected. We have thus created an implementation of Path Oblivious RAM (Path ORAM) for Dropbox users to obfuscate path access information to patch this vulnerability. This implementation differs significantly from the standard usage of Path ORAM, in that we introduce several innovations, including a dynamically growing and shrinking tree architecture, multi-block fetching, block packing and the possibility for multi-client use. Our optimizations together produce about a 77\% throughput increase and a 60\% reduction in necessary tree size; these numbers vary with file size distribution.
 
 \end{abstract}
 % IEEEtran.cls defaults to using nonbold math in the Abstract.
@@ -122,7 +119,7 @@ Immediately after its proposal in 2012, Path ORAM gained popularity in many appl
 In this work, we adapted Path ORAM for use with oblivious cloud storage, and propose several optimizations specific to the cloud storage setting.
 First, we have designed a system where ORAM on Dropbox can be used between multiple user computers. 
 We also propose the optimizations of multi-block fetching, which improves performance by 51.9\%, and block packing, which saves 50-70\% storage overhead. 
-Finally, we propose a dynamically growing and shrinking tree, providing the necessary storage size flexibility to work with Dropbox.
+Finally, we propose a dynamically growing and shrinking tree, providing the necessary storage size flexibility to work with Dropbox. All our optimizations together produce about a 77\% throughput increase, which varies with file size distribution.
 
 
 Previous oblivious storage works include PrivateFS \cite{PrivateFS}, Shroud \cite{Shroud} and ObliviStore \cite{oblivistore}.
@@ -430,7 +427,7 @@ Our final goal for this project is to make it into a public software package. Th
 \section{Conclusion}
 Using an ORAM system with Dropbox allows the user to hide a key piece of information, his/her access pattern. Doing so, however, costs a significant overhead. To counteract this, we have introduced a few optimizations, which, as shown in the evaluations section, cut down on the overhead and increase throughput. Additionally, to conform best with Dropbox, we have altered the Path ORAM system with improvements, including potential for multi-computer use and a dynamically resizing tree. These developments are unique to any Path ORAM work that has been previously described. Our goal is that continued optimization will increase Path ORAM’s speed sufficiently that it may be practical for mainstream use. 
 
-To summarize our work, we first designed and implemented a Path ORAM system to work with Dropbox. We then performed optimizations including multi-block fetching, block packing, and a growing and shrinking tree, improving performance by an estimated 60\%, and reducing storage overhead by 50-70\%. Both of these savings provide us with flexibility that is necessary for Path ORAM to work harmoniously with Dropbox.
+To summarize our work, we first designed and implemented a Path ORAM system to work with Dropbox. We then performed optimizations including multi-block fetching, block packing, and a growing and shrinking tree, improving performance by an estimated 77\%, and reducing storage overhead by 50-70\%. Both of these savings provide us with flexibility that is necessary for Path ORAM to work harmoniously with Dropbox.
 
 
 
