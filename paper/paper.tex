@@ -274,19 +274,20 @@ We performed a sweep study to evaluate the optimal segment size into which files
 
 \subsection{Initial ORAM Efficiency}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash}p{#1}}
-\begin{figure}
+\begin{table}
 \begin{center}
-  \noindent\begin{tabular}{| C{1.5cm} | C{3cm} | C{2.5cm} |}
+  \begin{tabular}{| C{1.5cm} | C{3cm} | C{2.5cm} |}
   \hline
   \bf{Disk} & \bf{Disk + Encryption} & \bf{Disk + ORAM} \\
   \hline
   42.13 & 24.42 & 0.66 \\
   \hline
 \end{tabular}
+\vspace{6pt}
 \caption{Baseline Comparisons (MB/s)}
 \label{tab:baseline}
 \end{center}
-\end{figure}
+\end{table}
 
 We evaluated the overhead cost of implementing of Path ORAM with that of encryption alone. As a baseline we compared this to reading/writing files to the local disk (Shown in Figure \ref{tab:baseline}).  Encryption added a little overhead (about 1.7 times slower) to the operations. Incorporating ORAM made the operations an additional 37 times slower when compared to encryption alone. As indicated by the table, the performance of our Dropbox-ORAM implementation without any optimizations is very slow, as expected. The remainder of this section evaluates the effectiveness of our improvements.
 
