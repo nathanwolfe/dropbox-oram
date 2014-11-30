@@ -187,8 +187,8 @@ The User File System interacts with the ORAM controller and provides the users w
 
 \begin{figure}
 \begin{center}
-\noindent\includegraphics[width=8cm]{320.pdf}
-\caption{Visual representation of how the User File System reads and writes files from and to Dropbox.}
+\includegraphics[width=8cm]{320.pdf}
+\caption{Visual representation of how the User File System splits and then reads/writes files from/to Dropbox.}
 \label{fig:userfilesys}
 \end{center}
 \end{figure}
@@ -249,9 +249,14 @@ In this section, we evaluate the performance of our optimizations.
 
 The CPU Model of the machine used for the experiments is Intel(R) Core\textsuperscript{TM} i3-2100 CPU @ 3.10GHz. The disk model is ST31000524AS (7200 RPM). Windows 7 operating system and Python 3.4 were used. Our encryption algorithm was Advanced Encryption Standard (AES) 128-bit in counter (CTR) mode, in the PyCrypto package v2.6.1.
 
-For all experiments, the parameters were kept at constant values (unless we were testing that parameter). The ORAM tree size (if auto resizing is off) was dependent on the amount of data written to it, twice the total file size. Segment size was 64 KB (optimal as indicated by Figure \ref{fig:segsize}) with bucket sizes of $Z$ = 3.  The maximum stash size was 100. The utilization ratio that triggers tree growth was 0.45 and for tree shrinkage 0.55. We use throughput as the performance metric, which is a measurement of how fast files can be read from and written to our ORAM-enabled Dropbox. It is expressed in bits per second or multiples of it. For our experiments we use megabytes per second (MB/s).
-
 For all the experiments except the one in Section \ref{sec:BlkPack}, we utilize a distribution of files of various sizes to better simulate the contents/actions of a “real” file system, by reading/writing 1000 files based upon this cumulative distribution. This file distribution was chosen from previous work done on file system workloads \cite{roselli2000comparison}, and is reproduced in Figure \ref{fig:distfun}.
+
+For all experiments, the parameters were kept at constant values (unless we were testing that parameter). 
+The ORAM tree size (if auto resizing is off) was dependent on the amount of data written to it, twice the total file size. 
+Segment size was 64 KB (optimal as indicated by Figure \ref{fig:segsize}) with bucket sizes of $Z$ = 3.  
+The maximum stash size was 100. 
+The utilization ratio that triggers tree growth was 0.45 and for tree shrinkage 0.55. 
+We use throughput in Mega Byte per second (MB/sec) as the performance metric.
 
 \begin{figure}
 \begin{center}
@@ -284,7 +289,7 @@ We performed a sweep study to evaluate the optimal segment size into which files
   \hline
 \end{tabular}
 \vspace{6pt}
-\caption{Throughput (in MB/s) of Path ORAM (before our optimization) and comparisons to two baselines.}
+\caption{Throughput (in MB/sec) of Path ORAM (before our optimization) and comparisons to two baselines.}
 \label{tab:baseline}
 \end{center}
 \end{table}
@@ -308,7 +313,7 @@ As noted in Section \ref{sec:mult-blkOpt}, we utilized multi-block fetching with
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=4.3cm]{550.pdf}\includegraphics[width=4.3cm]{551.pdf}
-\caption{Block Packing evaluations comparing tree size (in nodes) and throughput (in MB/sec)  with various file sizes (at segment size of 4 KB.)}
+\caption{Block Packing evaluations comparing tree size (in nodes) and throughput (in MB/sec) with various file sizes. }
 \label{fig:blockpack}
 \end{center}
 \end{figure}
@@ -321,7 +326,7 @@ We tested this optimization only in tandem with dynamic growing and shrinking. T
 \begin{figure}
 \begin{center}
 \noindent\includegraphics[width=8.5cm]{560.pdf}
-\caption{Tree resizing demonstration charting size of tree over time.}
+\caption{Tree resizing demonstration charting the number of ``real blocks'' stored in the tree and the size of tree over time.}
 \label{fig:resizing}
 \end{center}
 \end{figure}
