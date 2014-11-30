@@ -150,8 +150,8 @@ To access a block, the Path ORAM algorithm accesses all blocks along the target�
 We summarize how Path ORAM works in Figure \ref{fig:bintree}. The reader can refer to \cite{PathORAM} for more details. The binary tree is stored on the server. 
 Suppose it has height $L$ and $2^L$ leaves. 
 The levels are numbered 0 to $L$, where level 0 is the root and level $L$ contains the leaves (in a complete tree). 
-Each node in the binary tree is called a bucket, and contains $z$ blocks. 
-If a bucket contains less than $z$ “real” blocks, the remainder are composed of dummy blocks, which are indistinguishable from real blocks after encryption.
+Each node in the binary tree is called a bucket, and contains $Z$ blocks. 
+If a bucket contains less than $Z$ “real” blocks, the remainder are composed of dummy blocks, which are indistinguishable from real blocks after encryption.
 
 On the client side, we construct a data structure called the {\bf stash}, which stores a small subset of the data blocks, and a {\bf position map} that assigns each block to a path in the tree. Every path is uniquely defined as leading from the root to one of the $2^L$ leaf buckets. Importantly, mapping is random, allowing for multiple unrelated blocks to be mapped to one leaf. This is shown in Figure \ref{fig:bintree}: for example, both blocks B and E are mapped to leaf 1, and are required to reside on the path defined by this leaf (referred to as path 1). The position map is updated as blocks are accessed and their leaf assignments changed. This is critical because Path ORAM maintains the invariant that if the block is not on its assigned path, it is in the stash (if it is not, there is a bug).
 
@@ -249,7 +249,7 @@ In this section, we evaluate the performance of our optimizations.
 
 The CPU Model of the machine used for the experiments is Intel(R) Core\textsuperscript{TM} i3-2100 CPU @ 3.10GHz. The disk model is ST31000524AS (7200 RPM). Windows 7 operating system and Python 3.4 were used. Our encryption algorithm was Advanced Encryption Standard (AES) 128-bit in counter (CTR) mode, in the PyCrypto package v2.6.1.
 
-For all experiments, the parameters were kept at constant values (unless we were testing that parameter). The ORAM tree size (if auto resizing is off) was dependent on the amount of data written to it, twice the total file size. Segment size was 64 KB (optimal as indicated by Figure \ref{fig:segsize}) with bucket sizes of z = 3.  The maximum stash size was 100. The utilization ratio that triggers tree growth was 0.45 and for tree shrinkage 0.55. We use throughput as the performance metric, which is a measurement of how fast files can be read from and written to our ORAM-enabled Dropbox. It is expressed in bits per second or multiples of it. For our experiments we use megabytes per second (MB/s).
+For all experiments, the parameters were kept at constant values (unless we were testing that parameter). The ORAM tree size (if auto resizing is off) was dependent on the amount of data written to it, twice the total file size. Segment size was 64 KB (optimal as indicated by Figure \ref{fig:segsize}) with bucket sizes of $Z$ = 3.  The maximum stash size was 100. The utilization ratio that triggers tree growth was 0.45 and for tree shrinkage 0.55. We use throughput as the performance metric, which is a measurement of how fast files can be read from and written to our ORAM-enabled Dropbox. It is expressed in bits per second or multiples of it. For our experiments we use megabytes per second (MB/s).
 
 For all the experiments except the one in Section \ref{sec:BlkPack}, we utilize a distribution of files of various sizes to better simulate the contents/actions of a “real” file system, by reading/writing 1000 files based upon this cumulative distribution. This file distribution was chosen from previous work done on file system workloads \cite{roselli2000comparison}, and is reproduced in Figure \ref{fig:distfun}.
 
