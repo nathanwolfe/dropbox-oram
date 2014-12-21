@@ -1,0 +1,9 @@
+time-based buffer
+1st startup/2nd startup stuff
+multicomputer
+config paths
+merge monitor with main
+sync/quit
+crash recovery: "shadow" version of everything: tree, posmap, stash
+    whenever done syncing to main tree, set "valid" bit
+    if valid bit set, copy main tree to shadow version
